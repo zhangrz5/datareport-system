@@ -3,6 +3,7 @@ package com.company.datareport;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.retry.annotation.EnableRetry;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -13,7 +14,11 @@ import org.springframework.scheduling.annotation.EnableScheduling;
  * @author qwe
  * @since 2025-01-24
  */
-@SpringBootApplication
+@SpringBootApplication(exclude = { DataSourceAutoConfiguration.class }, excludeName = {
+        "com.alibaba.druid.spring.boot.autoconfigure.DruidDataSourceAutoConfiguration",
+        "org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration",
+        "org.redisson.spring.starter.RedissonAutoConfigurationV2"
+})
 @EnableScheduling
 @EnableAsync
 @EnableRetry

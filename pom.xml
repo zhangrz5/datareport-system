@@ -21,16 +21,16 @@
     <properties>
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <mybatis-plus.version>3.5.5</mybatis-plus.version>
+        <mybatis-plus.version>3.5.7</mybatis-plus.version>
         <dynamic-datasource.version>4.3.1</dynamic-datasource.version>
-        <druid.version>1.2.23</druid.version>
+        <druid.version>1.2.24</druid.version>
         <hutool.version>5.8.25</hutool.version>
         <fastjson.version>2.0.43</fastjson.version>
         <poi.version>5.2.5</poi.version>
         <postgresql.version>42.7.1</postgresql.version>
         <mysql.version>8.0.33</mysql.version>
         <dm.version>8.1.3.62</dm.version>
-        <redisson.version>3.36.0</redisson.version>
+        <redisson.version>3.37.0</redisson.version>
     </properties>
 
     <dependencies>
@@ -59,10 +59,17 @@
             <version>${mybatis-plus.version}</version>
         </dependency>
 
-        <!-- Dynamic Datasource (多数据源) -->
+        <!-- Explicitly force mybatis-spring version for Spring Boot 3.2+ compatibility -->
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-spring</artifactId>
+            <version>3.0.4</version>
+        </dependency>
+
+        <!-- Dynamic Datasource (多数据源) - Spring Boot 3 专用 -->
         <dependency>
             <groupId>com.baomidou</groupId>
-            <artifactId>dynamic-datasource-spring-boot-starter</artifactId>
+            <artifactId>dynamic-datasource-spring-boot3-starter</artifactId>
             <version>${dynamic-datasource.version}</version>
         </dependency>
 
