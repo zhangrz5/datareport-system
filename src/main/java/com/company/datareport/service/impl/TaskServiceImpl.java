@@ -52,31 +52,31 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
     @Override
     public int fetchTasksFromPlatform() {
         log.info("开始从平台获取任务列表...");
-        
+
         try {
             // 构建请求参数
             Map<String, Object> params = new HashMap<>();
             params.put("enterpriseCode", enterpriseCode);
             params.put("authKey", authKey);
-            
+
             // 调用平台API
             String response = restTemplate.postForObject(taskListUrl, params, String.class);
-            
+
             if (StrUtil.isEmpty(response)) {
                 log.warn("平台返回空数据");
                 return 0;
             }
-            
+
             // 解析响应数据(根据实际API格式调整)
             // 这里假设返回的是JSON数组
-            List<Map<String, Object>> taskList = JSONUtil.toList(response, Map.class);
-            
+            List<Map> taskList = JSONUtil.toList(response, Map.class);
+
             int count = 0;
-            for (Map<String, Object> taskMap : taskList) {
+            for (Map taskMap : taskList) {
                 // 检查任务是否已存在
                 String taskCode = (String) taskMap.get("taskCode");
                 Task existTask = taskMapper.selectByTaskCode(taskCode);
-                
+
                 if (existTask == null) {
                     // 创建新任务
                     Task task = new Task();
@@ -89,15 +89,15 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
                     task.setCollectRule(JSONUtil.toJsonStr(taskMap.get("collectRule")));
                     task.setTargetDatasource((String) taskMap.get("targetDatasource"));
                     task.setRetryCount(0);
-                    
+
                     this.save(task);
                     count++;
                 }
             }
-            
+
             log.info("从平台获取任务完成,新增任务数: {}", count);
             return count;
-            
+
         } catch (Exception e) {
             log.error("从平台获取任务失败", e);
             throw new BusinessException("从平台获取任务失败: " + e.getMessage());
@@ -123,43 +123,43 @@ public class TaskServiceImpl extends ServiceImpl<TaskMapper, Task> implements Ta
     @Transactional(rollbackFor = Exception.class)
     public void executeTask(Long taskId) {
         log.info("开始执行任务, taskId: {}", taskId);
-        
+
         Task task = this.getById(taskId);
         if (task == null) {
             throw new BusinessException("任务不存在");
         }
-        
+
         if (!BusinessConstants.TaskStatus.PENDING.equals(task.getTaskStatus())) {
             log.warn("任务状态不是待处理,跳过执行, taskId: {}, status: {}", taskId, task.getTaskStatus());
             return;
         }
-        
+
         try {
             // 更新任务状态为处理中
             task.setTaskStatus(BusinessConstants.TaskStatus.PROCESSING);
             task.setStartTime(LocalDateTime.now());
             this.updateById(task);
-            
+
             // 执行数据采集
             dataCollectService.collectData(task);
-            
+
             // 更新任务状态为已完成
             task.setTaskStatus(BusinessConstants.TaskStatus.COMPLETED);
             task.setEndTime(LocalDateTime.now());
             this.updateById(task);
-            
+
             log.info("任务执行完成, taskId: {}", taskId);
-            
+
         } catch (Exception e) {
             log.error("任务执行失败, taskId: {}", taskId, e);
-            
+
             // 更新任务状态为失败
             task.setTaskStatus(BusinessConstants.TaskStatus.FAILED);
             task.setEndTime(LocalDateTime.now());
             task.setErrorMsg(e.getMessage());
             task.setRetryCount(task.getRetryCount() + 1);
             this.updateById(task);
-            
+
             throw new BusinessException("任务执行失败: " + e.getMessage());
         }
     }
