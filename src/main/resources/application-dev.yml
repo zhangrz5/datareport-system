@@ -10,7 +10,7 @@ spring:
         # 主数据源(达梦数据库)
         master:
           driver-class-name: dm.jdbc.driver.DmDriver
-          url: jdbc:dm://100.100.200.213:5236/datareport?characterEncoding=UTF-8
+          url: jdbc:dm://100.100.200.213:5236/DATAREPORT?characterEncoding=UTF-8
           username: SYSDBA
           password: Ec123456
           type: com.alibaba.druid.pool.DruidDataSource
@@ -28,29 +28,29 @@ spring:
             pool-prepared-statements: true
             max-pool-prepared-statement-per-connection-size: 20
 
-        # 从数据源1(企业数据库 - MySQL示例)
-        slave1:
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/enterprise_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
-          username: root
-          password: root
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            initial-size: 5
-            min-idle: 5
-            max-active: 20
-
-        # 从数据源2(外部系统数据库 - PostgreSQL示例)
-        slave2:
-          driver-class-name: org.postgresql.Driver
-          url: jdbc:postgresql://localhost:5432/external_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
-          username: postgres
-          password: postgres
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            initial-size: 5
-            min-idle: 5
-            max-active: 20
+#        # 从数据源1(企业数据库 - MySQL示例)
+#        slave1:
+#          driver-class-name: com.mysql.cj.jdbc.Driver
+#          url: jdbc:mysql://localhost:3306/enterprise_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
+#          username: root
+#          password: root
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            initial-size: 5
+#            min-idle: 5
+#            max-active: 20
+#
+#        # 从数据源2(外部系统数据库 - PostgreSQL示例)
+#        slave2:
+#          driver-class-name: org.postgresql.Driver
+#          url: jdbc:postgresql://localhost:5432/external_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+#          username: postgres
+#          password: postgres
+#          type: com.alibaba.druid.pool.DruidDataSource
+#          druid:
+#            initial-size: 5
+#            min-idle: 5
+#            max-active: 20
   
   # Redis 配置 (可选 - 用于分布式锁)
   # 如果不配置Redis,系统将以单机模式运行,定时任务不使用分布式锁

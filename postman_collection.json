@@ -1,0 +1,293 @@
+{
+  "info": {
+    "name": "国资委数据采集交换平台接口",
+    "description": "国资委数据采集交换平台6个核心接口的测试集合",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080",
+      "type": "string"
+    },
+    {
+      "key": "username",
+      "value": "admin",
+      "type": "string"
+    },
+    {
+      "key": "password",
+      "value": "admin123",
+      "type": "string"
+    },
+    {
+      "key": "socialCreditCode",
+      "value": "91110000000000000X",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "1. 数据报送接口 (fileUpload)",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "src": "test.zip",
+              "description": "ZIP格式的报送数据文件"
+            },
+            {
+              "key": "APICODE",
+              "value": "SZ01",
+              "type": "text"
+            },
+            {
+              "key": "BUSTYPE",
+              "value": "0026",
+              "type": "text"
+            },
+            {
+              "key": "FILE_NAME",
+              "value": "test_data.zip",
+              "type": "text"
+            },
+            {
+              "key": "SOCIALCREDITCODE",
+              "value": "{{socialCreditCode}}",
+              "type": "text"
+            },
+            {
+              "key": "USER",
+              "value": "{{username}}",
+              "type": "text"
+            },
+            {
+              "key": "PASSWORD",
+              "value": "{{password}}",
+              "type": "text"
+            }
+          ]
+        },
+        "url": {
+          "raw": "{{baseUrl}}/preposed-machine/api/services/fileUpload",
+          "host": ["{{baseUrl}}"],
+          "path": ["preposed-machine", "api", "services", "fileUpload"]
+        },
+        "description": "企业内网的数据报送系统向前置服务器报送数据文件(加密的ZIP文件)的上传接口"
+      },
+      "response": []
+    },
+    {
+      "name": "2. 密钥证书接口 (keyDownload)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/preposed-machine/api/services/keyDownload?BUSTYPE=0001&USER={{username}}&PASSWORD={{password}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["preposed-machine", "api", "services", "keyDownload"],
+          "query": [
+            {
+              "key": "BUSTYPE",
+              "value": "0001",
+              "description": "业务类型"
+            },
+            {
+              "key": "USER",
+              "value": "{{username}}",
+              "description": "用户名"
+            },
+            {
+              "key": "PASSWORD",
+              "value": "{{password}}",
+              "description": "密码"
+            }
+          ]
+        },
+        "description": "获取密钥文件的下载接口。密钥文件为ZIP压缩文件,每次全量更新"
+      },
+      "response": []
+    },
+    {
+      "name": "3. 数据采集目录接口 (tempDownload)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/preposed-machine/api/services/tempDownload?BUSTYPE=0025&USER={{username}}&PASSWORD={{password}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["preposed-machine", "api", "services", "tempDownload"],
+          "query": [
+            {
+              "key": "BUSTYPE",
+              "value": "0025",
+              "description": "业务类型"
+            },
+            {
+              "key": "USER",
+              "value": "{{username}}",
+              "description": "用户名"
+            },
+            {
+              "key": "PASSWORD",
+              "value": "{{password}}",
+              "description": "密码"
+            }
+          ]
+        },
+        "description": "获取数据采集目录、相关模板文件(ZIP文件)等的下载接口"
+      },
+      "response": []
+    },
+    {
+      "name": "4. 接收采集任务接口 (taskDownload)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/preposed-machine/api/services/taskDownload?USER={{username}}&PASSWORD={{password}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["preposed-machine", "api", "services", "taskDownload"],
+          "query": [
+            {
+              "key": "USER",
+              "value": "{{username}}",
+              "description": "用户名"
+            },
+            {
+              "key": "PASSWORD",
+              "value": "{{password}}",
+              "description": "密码"
+            }
+          ]
+        },
+        "description": "获取补传任务文件(ZIP文件)的下载接口。该接口文件为增量更新文件,需要轮循调用获取所有文件"
+      },
+      "response": []
+    },
+    {
+      "name": "5. 接收下发数据接口 (noticeDownload)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/preposed-machine/api/services/noticeDownload?USER={{username}}&PASSWORD={{password}}",
+          "host": ["{{baseUrl}}"],
+          "path": ["preposed-machine", "api", "services", "noticeDownload"],
+          "query": [
+            {
+              "key": "USER",
+              "value": "{{username}}",
+              "description": "用户名"
+            },
+            {
+              "key": "PASSWORD",
+              "value": "{{password}}",
+              "description": "密码"
+            },
+            {
+              "key": "SYSCODE",
+              "value": "",
+              "description": "系统代号(安徽模式必填)",
+              "disabled": true
+            },
+            {
+              "key": "BUSTYPE",
+              "value": "",
+              "description": "业务类型(安徽模式必填)",
+              "disabled": true
+            }
+          ]
+        },
+        "description": "获取通知公告文件(ZIP文件)的下载接口"
+      },
+      "response": []
+    },
+    {
+      "name": "6. 数据日志接口 (logDownload)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/preposed-machine/api/services/logDownload?USER={{username}}&PASSWORD={{password}}&STARTDATE=20250101&ENDDATE=20250131&SIDE=ENTERPRISE",
+          "host": ["{{baseUrl}}"],
+          "path": ["preposed-machine", "api", "services", "logDownload"],
+          "query": [
+            {
+              "key": "USER",
+              "value": "{{username}}",
+              "description": "用户名"
+            },
+            {
+              "key": "PASSWORD",
+              "value": "{{password}}",
+              "description": "密码"
+            },
+            {
+              "key": "STARTDATE",
+              "value": "20250101",
+              "description": "开始日期(yyyyMMdd)"
+            },
+            {
+              "key": "ENDDATE",
+              "value": "20250131",
+              "description": "结束日期(yyyyMMdd)"
+            },
+            {
+              "key": "SIDE",
+              "value": "ENTERPRISE",
+              "description": "ENTERPRISE-报送文件日志, ETIMED-采集目录日志"
+            },
+            {
+              "key": "SYSCODE",
+              "value": "",
+              "description": "系统代号(安徽模式)",
+              "disabled": true
+            },
+            {
+              "key": "BUSTYPE",
+              "value": "",
+              "description": "业务类型(安徽模式)",
+              "disabled": true
+            }
+          ]
+        },
+        "description": "同步数据文件报送日志记录的下载接口"
+      },
+      "response": []
+    },
+    {
+      "name": "测试-错误的用户名密码",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/preposed-machine/api/services/keyDownload?BUSTYPE=0001&USER=wrong&PASSWORD=wrong",
+          "host": ["{{baseUrl}}"],
+          "path": ["preposed-machine", "api", "services", "keyDownload"],
+          "query": [
+            {
+              "key": "BUSTYPE",
+              "value": "0001"
+            },
+            {
+              "key": "USER",
+              "value": "wrong"
+            },
+            {
+              "key": "PASSWORD",
+              "value": "wrong"
+            }
+          ]
+        },
+        "description": "测试错误的用户名密码,应该返回serviceFlag=2"
+      },
+      "response": []
+    }
+  ]
+}

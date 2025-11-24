@@ -6,12 +6,20 @@
 
 ## 📚 文档导航
 
+### 基础文档
 - **[快速启动指南](./QUICK_START.md)** - 5分钟快速启动项目
 - **[达梦数据库配置指南](./DM_DATABASE_GUIDE.md)** - 达梦数据库详细配置说明
 - **[数据库迁移总结](./DM_MIGRATION_SUMMARY.md)** - 达梦数据库迁移记录
 - **[数据库对比指南](./DATABASE_COMPARISON.md)** - 三种数据库对比与选择
 - **[Redis使用说明](./REDIS_USAGE.md)** - Redis的作用和使用场景
 - **[升级指南](./UPGRADE_GUIDE.md)** - Spring Boot 2 升级到 3 的指南
+
+### 国资委接口文档 🆕
+- **[接口实现文档](./INTERFACE_IMPLEMENTATION.md)** - 6个接口的详细说明和使用指南
+- **[实现总结](./IMPLEMENTATION_SUMMARY.md)** - 已完成和待完成功能总结
+- **[接口快速开始](./QUICK_START.md)** - 接口测试和使用指南
+- **[SQL查询手册](./SQL_QUERIES.sql)** - 常用SQL查询语句
+- **[Postman测试集合](./postman_collection.json)** - 可导入Postman的接口测试集合
 
 ## 技术栈
 
@@ -58,6 +66,16 @@
 - 定时执行任务
 - 定时上报数据
 - 定时重试失败数据
+
+### 5. 国资委数据采集交换平台接口 🆕
+- **数据报送接口** - 向前置服务器上传加密ZIP文件
+- **密钥证书接口** - 下载SM2/SM4密钥文件
+- **数据采集目录接口** - 下载采集模板和示例文件
+- **接收采集任务接口** - 接收补传任务
+- **接收下发数据接口** - 接收通知公告
+- **数据日志接口** - 同步远程日志记录
+- 统一日志记录和配置管理
+- 支持安徽模式和标准模式
 
 ## 项目结构
 
@@ -120,6 +138,18 @@ datareport-system
 ### 3. t_upload_record (上报记录表)
 - 存储数据上报的详细记录
 - 记录请求参数、响应结果、耗时等
+
+### 4. 国资委接口相关表 🆕
+- **t_interface_log** - 统一接口调用日志表
+- **t_file_upload_record** - 数据报送记录表
+- **t_key_certificate** - 密钥证书表
+- **t_business_type** - 业务类型表
+- **t_template_info** - 采集模板信息表
+- **t_template_frequency** - 模板采集频率表
+- **t_supplement_task** - 补传任务表
+- **t_notice_announcement** - 通知公告表
+- **t_remote_log_sync** - 远程日志同步表
+- **t_interface_config** - 接口配置表
 
 ## 配置说明
 
@@ -273,6 +303,19 @@ POST   /api/data/upload/batch         # 手动批量上报
 POST   /api/data/upload/scheduled     # 触发定时上报
 POST   /api/data/upload/retry         # 重试失败上报
 ```
+
+### 国资委数据采集交换平台接口 🆕
+
+```
+POST   /preposed-machine/api/services/fileUpload       # 数据报送接口
+GET    /preposed-machine/api/services/keyDownload      # 密钥证书下载
+GET    /preposed-machine/api/services/tempDownload     # 采集目录下载
+GET    /preposed-machine/api/services/taskDownload     # 采集任务下载
+GET    /preposed-machine/api/services/noticeDownload   # 通知公告下载
+GET    /preposed-machine/api/services/logDownload      # 数据日志下载
+```
+
+**详细说明**: 请查看 [接口实现文档](./INTERFACE_IMPLEMENTATION.md)
 
 ## 多数据源使用
 
