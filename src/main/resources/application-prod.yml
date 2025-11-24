@@ -1,0 +1,41 @@
+spring:
+  datasource:
+    dynamic:
+      datasource:
+        master:
+          url: jdbc:postgresql://prod-db-host:5432/datareport?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+          username: ${DB_MASTER_USER:postgres}
+          password: ${DB_MASTER_PASS:postgres}
+        slave1:
+          url: jdbc:mysql://prod-mysql-host:3306/enterprise_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=true
+          username: ${DB_SLAVE1_USER:root}
+          password: ${DB_SLAVE1_PASS:root}
+        slave2:
+          url: jdbc:postgresql://prod-pg-host:5432/external_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
+          username: ${DB_SLAVE2_USER:postgres}
+          password: ${DB_SLAVE2_PASS:postgres}
+  
+  redis:
+    host: ${REDIS_HOST:localhost}
+    port: ${REDIS_PORT:6379}
+    password: ${REDIS_PASSWORD:}
+    database: 0
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
+
+logging:
+  level:
+    root: INFO
+    com.company.datareport: INFO
+    com.baomidou.dynamic: INFO
+
+app:
+  platform:
+    task-list-url: ${PLATFORM_TASK_URL:http://platform.example.com/api/tasks}
+    upload-url: ${PLATFORM_UPLOAD_URL:http://platform.example.com/api/upload}
+    enterprise-code: ${ENTERPRISE_CODE:ENTERPRISE_001}
+    auth-key: ${PLATFORM_AUTH_KEY:your-auth-key}
+  scheduler:
+    enabled: ${SCHEDULER_ENABLED:true}

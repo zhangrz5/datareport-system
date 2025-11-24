@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.datareport.mapper.TaskDataMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.company.datareport.entity.TaskData">
+        <id column="id" property="id" />
+        <result column="task_id" property="taskId" />
+        <result column="task_code" property="taskCode" />
+        <result column="data_code" property="dataCode" />
+        <result column="data_content" property="dataContent" />
+        <result column="data_source" property="dataSource" />
+        <result column="data_status" property="dataStatus" />
+        <result column="upload_status" property="uploadStatus" />
+        <result column="upload_time" property="uploadTime" />
+        <result column="upload_response" property="uploadResponse" />
+        <result column="retry_count" property="retryCount" />
+        <result column="error_msg" property="errorMsg" />
+        <result column="remark" property="remark" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
+        <result column="create_by" property="createBy" />
+        <result column="update_by" property="updateBy" />
+        <result column="deleted" property="deleted" />
+    </resultMap>
+
+    <!-- 根据任务ID查询任务数据列表 -->
+    <select id="selectByTaskId" resultMap="BaseResultMap">
+        SELECT * FROM t_task_data
+        WHERE deleted = 0
+        AND task_id = #{taskId}
+        ORDER BY create_time ASC
+    </select>
+
+    <!-- 查询待上报的数据 -->
+    <select id="selectPendingUploadData" resultMap="BaseResultMap">
+        SELECT * FROM t_task_data
+        WHERE deleted = 0
+        AND upload_status = 0
+        AND data_status = 2
+        ORDER BY create_time ASC
+        LIMIT #{limit}
+    </select>
+
+    <!-- 批量更新上报状态 -->
+    <update id="batchUpdateUploadStatus">
+        UPDATE t_task_data
+        SET upload_status = #{status},
+            update_time = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND deleted = 0
+    </update>
+
+</mapper>
