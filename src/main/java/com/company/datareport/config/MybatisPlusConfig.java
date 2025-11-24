@@ -21,16 +21,16 @@ public class MybatisPlusConfig {
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
         MybatisPlusInterceptor interceptor = new MybatisPlusInterceptor();
-        
-        // 分页插件(根据主数据源类型配置,这里使用PostgreSQL)
-        PaginationInnerInterceptor paginationInterceptor = new PaginationInnerInterceptor(DbType.POSTGRE_SQL);
+
+        // 分页插件(使用达梦数据库)
+        PaginationInnerInterceptor paginationInterceptor = new PaginationInnerInterceptor(DbType.DM);
         // 设置请求的页面大于最大页后操作,true调回到首页,false继续请求,默认false
         paginationInterceptor.setOverflow(false);
         // 设置最大单页限制数量,默认500条,-1不受限制
         paginationInterceptor.setMaxLimit(500L);
-        
+
         interceptor.addInnerInterceptor(paginationInterceptor);
-        
+
         return interceptor;
     }
 }

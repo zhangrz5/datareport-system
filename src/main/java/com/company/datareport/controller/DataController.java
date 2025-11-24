@@ -38,19 +38,19 @@ public class DataController {
             @RequestParam(defaultValue = "10") Integer size,
             @RequestParam(required = false) Long taskId,
             @RequestParam(required = false) Integer uploadStatus) {
-        
+
         Page<TaskData> page = new Page<>(current, size);
         QueryWrapper<TaskData> wrapper = new QueryWrapper<>();
-        
+
         if (taskId != null) {
             wrapper.eq("task_id", taskId);
         }
         if (uploadStatus != null) {
             wrapper.eq("upload_status", uploadStatus);
         }
-        
+
         wrapper.orderByDesc("create_time");
-        
+
         Page<TaskData> result = taskDataMapper.selectPage(page, wrapper);
         return Result.success(result);
     }
@@ -82,7 +82,7 @@ public class DataController {
     @GetMapping("/pending")
     public Result<List<TaskData>> getPendingUploadData(
             @RequestParam(defaultValue = "100") Integer limit) {
-        
+
         List<TaskData> dataList = taskDataMapper.selectPendingUploadData(limit);
         return Result.success(dataList);
     }
@@ -91,14 +91,14 @@ public class DataController {
      * 手动上报单条数据
      */
     @PostMapping("/upload/{id}")
-    public Result<Void> uploadSingle(@PathVariable Long id) {
+    public Result<String> uploadSingle(@PathVariable Long id) {
         log.info("手动上报单条数据, id: {}", id);
-        
+
         TaskData taskData = taskDataMapper.selectById(id);
         if (taskData == null) {
             return Result.error("数据不存在");
         }
-        
+
         boolean success = dataUploadService.uploadSingleData(taskData);
         if (success) {
             return Result.success("数据上报成功");
@@ -113,10 +113,10 @@ public class DataController {
     @PostMapping("/upload/batch")
     public Result<Integer> uploadBatch(@RequestBody List<Long> ids) {
         log.info("手动批量上报数据, 数量: {}", ids.size());
-        
+
         List<TaskData> taskDataList = taskDataMapper.selectBatchIds(ids);
         int successCount = dataUploadService.uploadBatchData(taskDataList);
-        
+
         return Result.success("批量上报完成,成功: " + successCount + "/" + ids.size(), successCount);
     }
 
@@ -124,7 +124,7 @@ public class DataController {
      * 触发定时上报
      */
     @PostMapping("/upload/scheduled")
-    public Result<Void> uploadScheduled() {
+    public Result<String> uploadScheduled() {
         log.info("手动触发定时上报");
         dataUploadService.executeScheduledUpload();
         return Result.success("定时上报执行完成");

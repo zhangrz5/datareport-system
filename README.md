@@ -4,19 +4,31 @@
 
 基于 Spring Boot + MyBatis-Plus 的多数据源数据采集上报系统,用于国资国企在线监管系统的数据采集、处理和上报。
 
+## 📚 文档导航
+
+- **[快速启动指南](./QUICK_START.md)** - 5分钟快速启动项目
+- **[达梦数据库配置指南](./DM_DATABASE_GUIDE.md)** - 达梦数据库详细配置说明
+- **[数据库迁移总结](./DM_MIGRATION_SUMMARY.md)** - 达梦数据库迁移记录
+- **[数据库对比指南](./DATABASE_COMPARISON.md)** - 三种数据库对比与选择
+- **[Redis使用说明](./REDIS_USAGE.md)** - Redis的作用和使用场景
+- **[升级指南](./UPGRADE_GUIDE.md)** - Spring Boot 2 升级到 3 的指南
+
 ## 技术栈
 
-- **核心框架**: Spring Boot 2.7.18
-- **数据库**: PostgreSQL / MySQL (多数据源支持)
-- **ORM框架**: MyBatis-Plus 3.5.5
-- **多数据源**: Dynamic-Datasource 4.2.0
-- **连接池**: Druid 1.2.20
-- **缓存**: Redis + Redisson
+
+- **核心框架**: Spring Boot 3.3.5
+- **JDK 版本**: JDK 17
+- **数据库**: 达梦数据库(DM) / PostgreSQL / MySQL (多数据源支持)
+- **ORM框架**: MyBatis-Plus 3.5.9
+- **多数据源**: Dynamic-Datasource 4.3.1
+- **连接池**: Druid 1.2.23
+- **缓存**: Redis + Redisson 3.36.0
 - **工具类**: Hutool 5.8.25
 - **JSON处理**: FastJSON2 2.0.43
 - **Excel处理**: Apache POI 5.2.5
 - **日志**: Logback
 - **其他**: Lombok, Spring Retry
+
 
 ## 主要功能
 
@@ -121,17 +133,17 @@ spring:
     dynamic:
       primary: master  # 默认数据源
       datasource:
-        master:        # 主数据源(本地业务库)
-          driver-class-name: org.postgresql.Driver
-          url: jdbc:postgresql://localhost:5432/datareport
-          username: postgres
-          password: postgres
-        slave1:        # 从数据源1(企业数据库)
+        master:        # 主数据源(达梦数据库)
+          driver-class-name: dm.jdbc.driver.DmDriver
+          url: jdbc:dm://localhost:5236/datareport
+          username: SYSDBA
+          password: SYSDBA
+        slave1:        # 从数据源1(MySQL)
           driver-class-name: com.mysql.cj.jdbc.Driver
           url: jdbc:mysql://localhost:3306/enterprise_db
           username: root
           password: root
-        slave2:        # 从数据源2(外部系统)
+        slave2:        # 从数据源2(PostgreSQL)
           driver-class-name: org.postgresql.Driver
           url: jdbc:postgresql://localhost:5432/external_db
           username: postgres
@@ -159,23 +171,59 @@ app:
     data-upload-cron: 0 0 3 * * ?             # 数据上报(每天3点)
 ```
 
+## 🔄 升级说明
+
+**重要提示**: 本项目已从 Spring Boot 2.7.18 + JDK 8 升级到 Spring Boot 3.3.5 + JDK 17。
+
+如果您是从旧版本升级，请务必查看 [UPGRADE_GUIDE.md](./UPGRADE_GUIDE.md) 了解详细的升级步骤和注意事项。
+
+主要变更：
+- JDK 版本从 1.8 升级到 17（必需）
+- Spring Boot 从 2.7.18 升级到 3.3.5
+- javax.* 包迁移到 jakarta.*
+- 依赖版本全面更新以兼容 Spring Boot 3
+
 ## 快速开始
 
 ### 1. 环境要求
 
-- JDK 1.8+
+- JDK 17+
 - Maven 3.6+
-- PostgreSQL 12+ / MySQL 8.0+
+- 达梦数据库 DM8+ (主数据源) / PostgreSQL 12+ / MySQL 8.0+ (从数据源)
 - Redis 5.0+
 
 ### 2. 数据库初始化
+
+#### 达梦数据库(推荐)
+
+```bash
+# 创建数据库
+CREATE DATABASE datareport;
+
+# 使用 disql 命令行工具执行初始化脚本
+disql SYSDBA/SYSDBA@localhost:5236 < src/main/resources/sql/schema-dm.sql
+```
+
+或在达梦数据库管理工具(DM Manager)中执行 `src/main/resources/sql/schema-dm.sql`
+
+#### PostgreSQL
 
 ```bash
 # 创建数据库
 CREATE DATABASE datareport;
 
 # 执行初始化脚本
-psql -U postgres -d datareport -f src/main/resources/sql/schema.sql
+psql -U postgres -d datareport -f src/main/resources/sql/schema-postgresql.sql
+```
+
+#### MySQL
+
+```bash
+# 创建数据库
+CREATE DATABASE datareport DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+# 执行初始化脚本
+mysql -u root -p datareport < src/main/resources/sql/schema-mysql.sql
 ```
 
 ### 3. 修改配置
@@ -270,12 +318,14 @@ public class DataCollectServiceImpl implements DataCollectService {
 
 ## 注意事项
 
-1. **数据源配置**: 根据实际情况配置多个数据源,注意数据库驱动的差异
-2. **SQL兼容性**: 不同数据库的SQL语法可能有差异,需要适配
-3. **事务管理**: 跨数据源操作时注意事务边界
-4. **性能优化**: 大批量数据采集时注意分批处理,避免内存溢出
-5. **监控告警**: 生产环境建议配置日志监控和异常告警
-6. **数据安全**: 敏感信息(密码、密钥)应使用加密存储
+1. **达梦数据库配置**: 详细配置说明请参考 [达梦数据库配置指南](./DM_DATABASE_GUIDE.md)
+2. **数据源配置**: 根据实际情况配置多个数据源,注意数据库驱动的差异
+3. **SQL兼容性**: 不同数据库的SQL语法可能有差异,项目提供了三种数据库的SQL脚本
+4. **事务管理**: 跨数据源操作时注意事务边界
+5. **性能优化**: 大批量数据采集时注意分批处理,避免内存溢出
+6. **监控告警**: 生产环境建议配置日志监控和异常告警
+7. **数据安全**: 敏感信息(密码、密钥)应使用加密存储
+
 
 ## 扩展开发
 

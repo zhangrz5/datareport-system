@@ -32,7 +32,7 @@ public class TaskScheduler {
     @Autowired
     private DataUploadService dataUploadService;
 
-    @Autowired
+    @Autowired(required = false)
     private RedissonClient redissonClient;
 
     /**
@@ -41,16 +41,23 @@ public class TaskScheduler {
      */
     @Scheduled(cron = "${app.scheduler.task-fetch-cron:0 0 1 * * ?}")
     public void fetchTasksScheduled() {
+        // 如果没有Redis客户端,直接执行(单机模式)
+        if (redissonClient == null) {
+            log.info("单机模式(无Redis): 开始执行定时任务: 拉取任务");
+            taskService.fetchTasksFromPlatform();
+            return;
+        }
+
         String lockKey = BusinessConstants.RedisKey.TASK_LOCK_PREFIX + "fetch";
         RLock lock = redissonClient.getLock(lockKey);
-        
+
         try {
             // 尝试获取锁,最多等待0秒,锁定60秒后自动释放
             if (lock.tryLock(0, 60, TimeUnit.SECONDS)) {
                 log.info("开始执行定时任务: 拉取任务");
-                
+
                 int count = taskService.fetchTasksFromPlatform();
-                
+
                 log.info("定时任务执行完成: 拉取任务, 新增任务数: {}", count);
             } else {
                 log.warn("定时任务正在执行中,跳过本次执行: 拉取任务");
@@ -70,22 +77,36 @@ public class TaskScheduler {
      */
     @Scheduled(cron = "0 */5 * * * ?")
     public void executeTasksScheduled() {
+        // 如果没有Redis客户端,直接执行(单机模式)
+        if (redissonClient == null) {
+            log.info("单机模式(无Redis): 开始执行定时任务: 处理待执行任务");
+            List<Task> pendingTasks = taskService.getPendingTasks();
+            for (Task task : pendingTasks) {
+                try {
+                    taskService.executeTask(task.getId());
+                } catch (Exception e) {
+                    log.error("任务执行失败, taskId: {}", task.getId(), e);
+                }
+            }
+            return;
+        }
+
         String lockKey = BusinessConstants.RedisKey.TASK_LOCK_PREFIX + "execute";
         RLock lock = redissonClient.getLock(lockKey);
-        
+
         try {
             if (lock.tryLock(0, 300, TimeUnit.SECONDS)) {
                 log.info("开始执行定时任务: 处理待执行任务");
-                
+
                 List<Task> pendingTasks = taskService.getPendingTasks();
-                
+
                 if (pendingTasks.isEmpty()) {
                     log.info("没有待处理的任务");
                     return;
                 }
-                
+
                 log.info("查询到待处理任务: {} 个", pendingTasks.size());
-                
+
                 for (Task task : pendingTasks) {
                     try {
                         taskService.executeTask(task.getId());
@@ -93,7 +114,7 @@ public class TaskScheduler {
                         log.error("任务执行失败, taskId: {}", task.getId(), e);
                     }
                 }
-                
+
                 log.info("定时任务执行完成: 处理待执行任务");
             } else {
                 log.warn("定时任务正在执行中,跳过本次执行: 处理待执行任务");
@@ -113,15 +134,22 @@ public class TaskScheduler {
      */
     @Scheduled(cron = "${app.scheduler.data-upload-cron:0 0 3 * * ?}")
     public void uploadDataScheduled() {
+        // 如果没有Redis客户端,直接执行(单机模式)
+        if (redissonClient == null) {
+            log.info("单机模式(无Redis): 开始执行定时任务: 上报数据");
+            dataUploadService.executeScheduledUpload();
+            return;
+        }
+
         String lockKey = BusinessConstants.RedisKey.UPLOAD_LOCK_PREFIX + "scheduled";
         RLock lock = redissonClient.getLock(lockKey);
-        
+
         try {
             if (lock.tryLock(0, 300, TimeUnit.SECONDS)) {
                 log.info("开始执行定时任务: 上报数据");
-                
+
                 dataUploadService.executeScheduledUpload();
-                
+
                 log.info("定时任务执行完成: 上报数据");
             } else {
                 log.warn("定时任务正在执行中,跳过本次执行: 上报数据");
@@ -141,15 +169,22 @@ public class TaskScheduler {
      */
     @Scheduled(cron = "0 0 */1 * * ?")
     public void retryFailedUploadsScheduled() {
+        // 如果没有Redis客户端,直接执行(单机模式)
+        if (redissonClient == null) {
+            log.info("单机模式(无Redis): 开始执行定时任务: 重试失败的上报");
+            dataUploadService.retryFailedUploads();
+            return;
+        }
+
         String lockKey = BusinessConstants.RedisKey.UPLOAD_LOCK_PREFIX + "retry";
         RLock lock = redissonClient.getLock(lockKey);
-        
+
         try {
             if (lock.tryLock(0, 60, TimeUnit.SECONDS)) {
                 log.info("开始执行定时任务: 重试失败的上报");
-                
+
                 int count = dataUploadService.retryFailedUploads();
-                
+
                 log.info("定时任务执行完成: 重试失败的上报, 成功数: {}", count);
             } else {
                 log.warn("定时任务正在执行中,跳过本次执行: 重试失败的上报");

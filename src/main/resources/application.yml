@@ -14,72 +14,22 @@ spring:
   profiles:
     active: dev
   
-  # 多数据源配置
-  datasource:
-    dynamic:
-      # 设置默认的数据源或者数据源组
-      primary: master
-      # 严格匹配数据源,默认false. true未匹配到指定数据源时抛异常,false使用默认数据源
-      strict: false
-      datasource:
-        # 主数据源(本地业务库)
-        master:
-          driver-class-name: org.postgresql.Driver
-          url: jdbc:postgresql://localhost:5432/datareport?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
-          username: postgres
-          password: postgres
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            initial-size: 5
-            min-idle: 5
-            max-active: 20
-            max-wait: 60000
-            time-between-eviction-runs-millis: 60000
-            min-evictable-idle-time-millis: 300000
-            validation-query: SELECT 1
-            test-while-idle: true
-            test-on-borrow: false
-            test-on-return: false
-            pool-prepared-statements: true
-            max-pool-prepared-statement-per-connection-size: 20
-            
-        # 从数据源1(企业数据库 - MySQL示例)
-        slave1:
-          driver-class-name: com.mysql.cj.jdbc.Driver
-          url: jdbc:mysql://localhost:3306/enterprise_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
-          username: root
-          password: root
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            initial-size: 5
-            min-idle: 5
-            max-active: 20
-            
-        # 从数据源2(外部系统数据库 - PostgreSQL示例)
-        slave2:
-          driver-class-name: org.postgresql.Driver
-          url: jdbc:postgresql://localhost:5432/external_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai
-          username: postgres
-          password: postgres
-          type: com.alibaba.druid.pool.DruidDataSource
-          druid:
-            initial-size: 5
-            min-idle: 5
-            max-active: 20
 
-  # Redis 配置
-  redis:
-    host: localhost
-    port: 6379
-    password: 
-    database: 0
-    timeout: 5000ms
-    lettuce:
-      pool:
-        max-active: 20
-        max-wait: -1ms
-        max-idle: 10
-        min-idle: 0
+  # Redis 配置 (可选 - 用于分布式锁)
+  # 如果不配置Redis,系统将以单机模式运行,定时任务不使用分布式锁
+  # 如需启用分布式锁功能,请取消以下注释并配置正确的Redis连接信息
+#  redis:
+#    host: 192.168.123.1
+#    port: 6379
+#    password: 
+#    database: 0
+#    timeout: 5000ms
+#    lettuce:
+#      pool:
+#        max-active: 20
+#        max-wait: -1ms
+#        max-idle: 10
+#        min-idle: 0
 
   # 任务调度配置
   task:
@@ -108,9 +58,6 @@ mybatis-plus:
     db-config:
       # 主键类型(使用数据库自增)
       id-type: auto
-      # 字段策略(非空判断)
-      insert-strategy: not_null
-      update-strategy: not_null
       # 逻辑删除字段名
       logic-delete-field: deleted
       # 逻辑删除值(删除后的值)
@@ -134,40 +81,4 @@ logging:
     max-size: 100MB
     max-history: 30
 
-# 应用自定义配置
-app:
-  # 监管平台配置
-  platform:
-    # 获取任务列表API
-    task-list-url: http://platform.example.com/api/tasks
-    # 上报数据API
-    upload-url: http://platform.example.com/api/upload
-    # 企业编码
-    enterprise-code: ENTERPRISE_001
-    # 认证密钥
-    auth-key: your-auth-key
-    # 请求超时时间(秒)
-    timeout: 30
-    
-  # 任务调度配置
-  scheduler:
-    # 是否启用定时任务
-    enabled: true
-    # 任务拉取Cron表达式(每天凌晨1点执行)
-    task-fetch-cron: 0 0 1 * * ?
-    # 数据上报Cron表达式(每天凌晨3点执行)
-    data-upload-cron: 0 0 3 * * ?
-    
-  # 重试配置
-  retry:
-    # 最大重试次数
-    max-attempts: 3
-    # 重试间隔(毫秒)
-    backoff: 2000
-    
-  # 文件上传配置
-  upload:
-    # 临时文件存储路径
-    temp-path: /tmp/datareport
-    # 单文件最大大小(MB)
-    max-file-size: 50
+
