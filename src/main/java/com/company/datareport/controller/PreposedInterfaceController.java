@@ -71,6 +71,9 @@ public class PreposedInterfaceController {
     @Autowired
     private InterfaceLogMapper interfaceLogMapper;
 
+    @Autowired
+    private RemoteLogSyncMapper remoteLogSyncMapper;
+
     /**
      * 接口1: 数据报送接口
      * POST /preposed-machine/api/services/fileUpload
@@ -439,57 +442,70 @@ public class PreposedInterfaceController {
 
         try {
             // 验证用户名密码
-            if (!configService.validateCredentials(user, password)) {
-                interfaceLog.setServiceFlag("2");
-                interfaceLog.setResponseMsg("日志下载接口:用户名或密码错误");
-                interfaceLog.setStatus(3);
-                logService.updateLog(interfaceLog);
+            if (!validateCredentials(user, password, interfaceLog)) {
                 return ResponseEntity.ok(InterfaceResponse.noPermission("日志下载接口:用户名或密码错误"));
             }
 
-            // 构建日志查询条件
-            com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<InterfaceLog> queryWrapper =
+            // 构建远程日志查询条件
+            com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<RemoteLogSync> queryWrapper =
                 new com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper<>();
 
-            // 时间范围筛选
+            // 时间范围筛选 (日期格式: yyyyMMdd)
             if (startDate != null && !startDate.isEmpty()) {
                 try {
-                    LocalDateTime startDateTime = LocalDateTime.parse(startDate + " 00:00:00",
-                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                    queryWrapper.ge(InterfaceLog::getRequestTime, startDateTime);
+                    LocalDateTime startDateTime = LocalDateTime.parse(startDate + "000000",
+                        DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+                    queryWrapper.ge(RemoteLogSync::getPushDate, startDateTime);
                 } catch (Exception e) {
-                    log.warn("开始日期格式错误: {}", startDate);
+                    log.warn("开始日期格式错误: {}, 应为yyyyMMdd格式", startDate);
                 }
             }
 
             if (endDate != null && !endDate.isEmpty()) {
                 try {
-                    LocalDateTime endDateTime = LocalDateTime.parse(endDate + " 23:59:59",
-                        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-                    queryWrapper.le(InterfaceLog::getRequestTime, endDateTime);
+                    LocalDateTime endDateTime = LocalDateTime.parse(endDate + "235959",
+                        DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+                    queryWrapper.le(RemoteLogSync::getPushDate, endDateTime);
                 } catch (Exception e) {
-                    log.warn("结束日期格式错误: {}", endDate);
+                    log.warn("结束日期格式错误: {}, 应为yyyyMMdd格式", endDate);
                 }
             }
 
-            // 业务类型筛选
-            if (busType != null && !busType.isEmpty()) {
-                queryWrapper.eq(InterfaceLog::getBusinessType, busType);
+            // SIDE参数筛选模块编码
+            if (side != null && !side.isEmpty()) {
+                if ("ENTERPRISE".equalsIgnoreCase(side)) {
+                    // 返回报送文件日志
+                    queryWrapper.eq(RemoteLogSync::getModuleCode, "DATAPUSHLOG");
+                } else if ("ETIMED".equalsIgnoreCase(side)) {
+                    // 返回获取采集目录日志
+                    queryWrapper.eq(RemoteLogSync::getModuleCode, "TEMP");
+                }
             }
 
-            // 按时间倒序排列
-            queryWrapper.orderByDesc(InterfaceLog::getRequestTime);
+            // 业务编码筛选
+            if (busType != null && !busType.isEmpty()) {
+                queryWrapper.eq(RemoteLogSync::getBusinessCode, busType);
+            }
+
+            // 按推送时间倒序排列
+            queryWrapper.orderByDesc(RemoteLogSync::getPushDate);
 
             // 限制查询数量，避免数据量过大
             queryWrapper.last("LIMIT 1000");
 
-            // 查询日志列表
-            List<InterfaceLog> logs = interfaceLogMapper.selectList(queryWrapper);
+            // 查询远程日志列表
+            List<RemoteLogSync> logs = remoteLogSyncMapper.selectList(queryWrapper);
 
             // 转换为DTO
             List<LogDownloadDTO> logList = logs.stream().map(log -> {
                 LogDownloadDTO dto = new LogDownloadDTO();
-                BeanUtils.copyProperties(log, dto);
+                dto.setElId(log.getElId());
+                dto.setBusinessCode(log.getBusinessCode());
+                dto.setFileName(log.getFileName());
+                dto.setPushDate(log.getPushDate());
+                dto.setGrabDate(log.getGrabDate());
+                dto.setRepairMark(log.getRepairMark());
+                dto.setElCreatedate(log.getElCreatedate());
                 return dto;
             }).collect(Collectors.toList());
 

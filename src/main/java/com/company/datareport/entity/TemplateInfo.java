@@ -66,6 +66,11 @@ public class TemplateInfo implements Serializable {
     private String filePath;
 
     /**
+     * 模板内容(解密后)
+     */
+    private String templateContentDecrypted;
+
+    /**
      * 示例文件名
      */
     private String exampleFileName;

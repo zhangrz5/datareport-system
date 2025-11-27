@@ -40,34 +40,7 @@
 
 ## 主要功能
 
-### 1. 任务管理
-- 从监管平台获取采集任务
-- 任务状态管理(待处理/处理中/已完成/失败)
-- 任务执行与调度
-- 任务查询与统计
-
-### 2. 数据采集
-- **多数据源支持**
-  - 本地数据库采集
-  - 企业系统数据库采集
-  - 外部接口采集
-  - Excel文件导入
-- 动态SQL执行
-- 数据转换与处理
-
-### 3. 数据上报
-- 单条数据上报
-- 批量数据上报
-- 失败重试机制
-- 上报记录追踪
-
-### 4. 定时任务
-- 定时拉取任务
-- 定时执行任务
-- 定时上报数据
-- 定时重试失败数据
-
-### 5. 国资委数据采集交换平台接口 🆕
+### 国资委数据采集交换平台接口
 - **数据报送接口** - 向前置服务器上传加密ZIP文件
 - **密钥证书接口** - 下载SM2/SM4密钥文件
 - **数据采集目录接口** - 下载采集模板和示例文件
@@ -83,9 +56,9 @@
 datareport-system
 ├── src/main/java/com/company/datareport/
 │   ├── common/                     # 公共模块
-│   │   ├── constants/             # 常量定义
-│   │   │   ├── BusinessConstants.java    # 业务常量
-│   │   │   └── DataSourceConstants.java  # 数据源常量
+│   │   ├── dto/                   # 数据传输对象
+│   │   │   ├── InterfaceResponse.java    # 接口统一响应
+│   │   │   └── LogDownloadDTO.java       # 日志下载DTO
 │   │   ├── exception/             # 异常处理
 │   │   │   ├── BusinessException.java    # 业务异常
 │   │   │   └── GlobalExceptionHandler.java  # 全局异常处理器
@@ -97,28 +70,34 @@ datareport-system
 │   │   ├── RedisConfig.java              # Redis配置
 │   │   └── RestTemplateConfig.java       # RestTemplate配置
 │   ├── entity/                    # 实体类
-│   │   ├── Task.java              # 任务实体
-│   │   ├── TaskData.java          # 任务数据实体
-│   │   └── UploadRecord.java      # 上报记录实体
+│   │   ├── InterfaceLog.java             # 接口日志实体
+│   │   ├── FileUploadRecord.java         # 文件上传记录
+│   │   ├── KeyCertificate.java           # 密钥证书
+│   │   ├── TemplateInfo.java             # 模板信息
+│   │   ├── SupplementTask.java           # 补传任务
+│   │   ├── NoticeAnnouncement.java       # 通知公告
+│   │   ├── RemoteLogSync.java            # 远程日志同步
+│   │   ├── BusinessType.java             # 业务类型
+│   │   └── InterfaceConfig.java          # 接口配置
 │   ├── mapper/                    # Mapper接口
-│   │   ├── TaskMapper.java
-│   │   ├── TaskDataMapper.java
-│   │   └── UploadRecordMapper.java
+│   │   ├── InterfaceLogMapper.java
+│   │   ├── FileUploadRecordMapper.java
+│   │   ├── KeyCertificateMapper.java
+│   │   ├── TemplateInfoMapper.java
+│   │   ├── SupplementTaskMapper.java
+│   │   ├── NoticeAnnouncementMapper.java
+│   │   └── RemoteLogSyncMapper.java
 │   ├── service/                   # 服务接口
-│   │   ├── TaskService.java
-│   │   ├── DataCollectService.java
-│   │   ├── DataUploadService.java
+│   │   ├── InterfaceConfigService.java
+│   │   ├── InterfaceLogService.java
 │   │   └── impl/                  # 服务实现类
 │   ├── controller/                # 控制器
-│   │   ├── TaskController.java
-│   │   └── DataController.java
-│   ├── scheduled/                 # 定时任务
-│   │   └── TaskScheduler.java
+│   │   └── PreposedInterfaceController.java  # 国资委接口控制器
 │   └── DataReportApplication.java # 启动类
 ├── src/main/resources/
-│   ├── mapper/                    # Mapper XML文件
 │   ├── sql/                       # 数据库脚本
-│   │   └── schema.sql            # 初始化脚本
+│   │   ├── schema-interface.sql          # MySQL初始化脚本
+│   │   └── schema-interface-dm.sql       # 达梦数据库初始化脚本
 │   ├── application.yml           # 主配置文件
 │   ├── application-dev.yml       # 开发环境配置
 │   └── application-prod.yml      # 生产环境配置
@@ -127,19 +106,7 @@ datareport-system
 
 ## 数据库设计
 
-### 1. t_task (任务表)
-- 存储从平台获取的采集任务信息
-- 记录任务状态、执行时间、采集规则等
-
-### 2. t_task_data (任务数据表)
-- 存储采集到的业务数据
-- 记录数据状态、上报状态等
-
-### 3. t_upload_record (上报记录表)
-- 存储数据上报的详细记录
-- 记录请求参数、响应结果、耗时等
-
-### 4. 国资委接口相关表 🆕
+### 国资委接口相关表
 - **t_interface_log** - 统一接口调用日志表
 - **t_file_upload_record** - 数据报送记录表
 - **t_key_certificate** - 密钥证书表
@@ -231,20 +198,10 @@ app:
 CREATE DATABASE datareport;
 
 # 使用 disql 命令行工具执行初始化脚本
-disql SYSDBA/SYSDBA@localhost:5236 < src/main/resources/sql/schema-dm.sql
+disql SYSDBA/SYSDBA@localhost:5236 < src/main/resources/sql/schema-interface-dm.sql
 ```
 
-或在达梦数据库管理工具(DM Manager)中执行 `src/main/resources/sql/schema-dm.sql`
-
-#### PostgreSQL
-
-```bash
-# 创建数据库
-CREATE DATABASE datareport;
-
-# 执行初始化脚本
-psql -U postgres -d datareport -f src/main/resources/sql/schema-postgresql.sql
-```
+或在达梦数据库管理工具(DM Manager)中执行 `src/main/resources/sql/schema-interface-dm.sql`
 
 #### MySQL
 
@@ -253,7 +210,7 @@ psql -U postgres -d datareport -f src/main/resources/sql/schema-postgresql.sql
 CREATE DATABASE datareport DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 # 执行初始化脚本
-mysql -u root -p datareport < src/main/resources/sql/schema-mysql.sql
+mysql -u root -p datareport < src/main/resources/sql/schema-interface.sql
 ```
 
 ### 3. 修改配置
@@ -277,34 +234,7 @@ java -jar target/datareport-system-1.0.0-SNAPSHOT.jar --spring.profiles.active=d
 
 ## API接口
 
-### 任务管理
-
-```
-POST   /api/task/fetch                # 手动拉取任务
-GET    /api/task/list                 # 查询任务列表(分页)
-GET    /api/task/{id}                 # 查询任务详情
-GET    /api/task/pending              # 查询待处理任务
-POST   /api/task/execute/{id}         # 手动执行任务
-PUT    /api/task/status/{id}          # 更新任务状态
-POST   /api/task                      # 创建任务
-PUT    /api/task                      # 更新任务
-DELETE /api/task/{id}                 # 删除任务
-```
-
-### 数据管理
-
-```
-GET    /api/data/list                 # 查询数据列表(分页)
-GET    /api/data/{id}                 # 查询数据详情
-GET    /api/data/task/{taskId}        # 根据任务ID查询数据
-GET    /api/data/pending              # 查询待上报数据
-POST   /api/data/upload/{id}          # 手动上报单条数据
-POST   /api/data/upload/batch         # 手动批量上报
-POST   /api/data/upload/scheduled     # 触发定时上报
-POST   /api/data/upload/retry         # 重试失败上报
-```
-
-### 国资委数据采集交换平台接口 🆕
+### 国资委数据采集交换平台接口
 
 ```
 POST   /preposed-machine/api/services/fileUpload       # 数据报送接口
@@ -317,92 +247,29 @@ GET    /preposed-machine/api/services/logDownload      # 数据日志下载
 
 **详细说明**: 请查看 [接口实现文档](./INTERFACE_IMPLEMENTATION.md)
 
-## 多数据源使用
-
-### 在Mapper上指定数据源
-
-```java
-@Mapper
-@DS("master")  // 使用主数据源
-public interface TaskMapper extends BaseMapper<Task> {
-    // ...
-}
-
-@Mapper
-@DS("slave1")  // 使用从数据源1
-public interface EnterpriseDataMapper extends BaseMapper<EnterpriseData> {
-    // ...
-}
-```
-
-### 在Service方法上动态切换
-
-```java
-@Service
-public class DataCollectServiceImpl implements DataCollectService {
-    
-    @DS("slave2")  // 使用从数据源2
-    public List<TaskData> collectFromExternalDB(Task task) {
-        // 数据采集逻辑
-    }
-}
-```
-
-## 定时任务说明
-
-系统提供以下定时任务:
-
-1. **任务拉取**: 每天凌晨1点执行,从监管平台获取新任务
-2. **任务执行**: 每5分钟执行一次,处理待执行的任务
-3. **数据上报**: 每天凌晨3点执行,批量上报采集的数据
-4. **失败重试**: 每小时执行一次,重试上报失败的数据
-
-所有定时任务使用 Redisson 分布式锁,避免集群环境下重复执行。
-
 ## 注意事项
 
 1. **达梦数据库配置**: 详细配置说明请参考 [达梦数据库配置指南](./DM_DATABASE_GUIDE.md)
-2. **数据源配置**: 根据实际情况配置多个数据源,注意数据库驱动的差异
-3. **SQL兼容性**: 不同数据库的SQL语法可能有差异,项目提供了三种数据库的SQL脚本
-4. **事务管理**: 跨数据源操作时注意事务边界
-5. **性能优化**: 大批量数据采集时注意分批处理,避免内存溢出
+2. **接口认证**: 所有接口都需要USER和PASSWORD参数进行身份验证
+3. **文件格式**: 数据报送接口要求ZIP格式的加密文件
+4. **日志管理**: 所有接口调用都会记录到t_interface_log表
+5. **安徽模式**: 通知下载接口支持安徽模式，需要额外的SYSCODE和BUSTYPE参数
 6. **监控告警**: 生产环境建议配置日志监控和异常告警
 7. **数据安全**: 敏感信息(密码、密钥)应使用加密存储
 
-
-## 扩展开发
-
-### 1. 添加新的数据源
-
-在 `application.yml` 中添加数据源配置,然后在代码中使用 `@DS("datasource_name")` 注解。
-
-### 2. 实现新的采集方式
-
-在 `DataCollectService` 中添加新的采集方法,如:
-
-```java
-public List<TaskData> collectFromNewSource(Task task) {
-    // 实现新的采集逻辑
-}
-```
-
-### 3. 自定义上报格式
-
-修改 `DataUploadServiceImpl` 中的 `uploadSingleData` 方法,调整请求数据格式。
-
 ## 常见问题
 
-### 1. 多数据源连接失败
+### 1. 数据库连接失败
 
 检查数据库连接配置是否正确,确认数据库驱动版本匹配。
 
-### 2. 定时任务不执行
+### 2. 接口认证失败
 
-检查 `app.scheduler.enabled` 配置是否为 `true`,查看日志确认是否有异常。
+检查 `t_interface_config` 表中的用户名密码配置是否正确。
 
-### 3. 数据上报失败
+### 3. 文件下载返回空
 
-检查监管平台API地址和认证信息是否正确,查看上报记录表的错误信息。
+检查对应的数据表(t_key_certificate、t_template_info等)是否有未下载的记录。
 
 ## 许可证
 

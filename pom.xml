@@ -123,6 +123,13 @@
             <version>${hutool.version}</version>
         </dependency>
 
+        <!-- BouncyCastle 加密库（国密 SM2/SM4 支持）-->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk18on</artifactId>
+            <version>1.78.1</version>
+        </dependency>
+
         <!-- FastJSON -->
         <dependency>
             <groupId>com.alibaba.fastjson2</groupId>

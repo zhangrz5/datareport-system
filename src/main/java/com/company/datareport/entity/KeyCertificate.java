@@ -51,6 +51,16 @@ public class KeyCertificate implements Serializable {
     private String sm4Key;
 
     /**
+     * SM2公钥(解密后明文)
+     */
+    private String sm2PublicKeyDecrypted;
+
+    /**
+     * SM4密钥(解密后明文)
+     */
+    private String sm4KeyDecrypted;
+
+    /**
      * 密钥文件名
      */
     private String fileName;

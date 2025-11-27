@@ -66,6 +66,11 @@ public class NoticeAnnouncement implements Serializable {
     private String filePath;
 
     /**
+     * 通知内容(解密后)
+     */
+    private String noticeContentDecrypted;
+
+    /**
      * 附件数量
      */
     private Integer attachmentCount;

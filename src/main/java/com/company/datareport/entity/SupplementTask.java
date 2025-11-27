@@ -88,6 +88,11 @@ public class SupplementTask implements Serializable {
     private String filePath;
 
     /**
+     * 任务内容(解密后)
+     */
+    private String taskContentDecrypted;
+
+    /**
      * 下载时间
      */
     private LocalDateTime downloadTime;

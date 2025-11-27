@@ -1,11 +1,12 @@
 package com.company.datareport.common.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 日志下载响应DTO
+ * 日志下载响应DTO (符合国资委接口文档规范)
  *
  * @author system
  * @since 2025-11-25
@@ -14,79 +15,47 @@ import java.time.LocalDateTime;
 public class LogDownloadDTO {
 
     /**
-     * 日志ID
+     * 日志主键ID
      */
-    private String logId;
+    @JsonProperty("el_id")
+    private String elId;
 
     /**
-     * 接口类型
+     * 业务编码
      */
-    private String interfaceType;
+    @JsonProperty("business_code")
+    private String businessCode;
 
     /**
-     * 接口地址
+     * 报送文件名称
      */
-    private String interfaceUrl;
-
-    /**
-     * 请求方法
-     */
-    private String requestMethod;
-
-    /**
-     * 请求时间
-     */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime requestTime;
-
-    /**
-     * 响应时间
-     */
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-    private LocalDateTime responseTime;
-
-    /**
-     * 耗时(毫秒)
-     */
-    private Long costTime;
-
-    /**
-     * 服务标识: 0-失败, 1-成功, 2-无权限, 3-无新文件
-     */
-    private String serviceFlag;
-
-    /**
-     * 响应消息
-     */
-    private String responseMsg;
-
-    /**
-     * 文件名称
-     */
+    @JsonProperty("file_name")
     private String fileName;
 
     /**
-     * 文件大小(字节)
+     * 推送时间
      */
-    private Long fileSize;
+    @JsonProperty("push_date")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime pushDate;
 
     /**
-     * 业务类型
+     * 抓取时间
      */
-    private String businessType;
+    @JsonProperty("grab_date")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime grabDate;
 
     /**
-     * 社会信用代码
+     * 补录标识: 1-正常上传, 0-主动补录, 其他-被动补录任务ID
      */
-    private String socialCreditCode;
+    @JsonProperty("repair_mark")
+    private String repairMark;
 
     /**
-     * 处理状态: 0-未处理, 1-处理中, 2-处理成功, 3-处理失败
+     * 日志生成时间
      */
-    private Integer status;
-
-    /**
-     * 错误信息
-     */
-    private String errorMsg;
+    @JsonProperty("el_createdate")
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime elCreatedate;
 }
