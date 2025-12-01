@@ -28,17 +28,24 @@ spring:
             pool-prepared-statements: true
             max-pool-prepared-statement-per-connection-size: 20
 
-#        # 从数据源1(企业数据库 - MySQL示例)
-#        slave1:
-#          driver-class-name: com.mysql.cj.jdbc.Driver
-#          url: jdbc:mysql://localhost:3306/enterprise_db?useUnicode=true&characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
-#          username: root
-#          password: root
-#          type: com.alibaba.druid.pool.DruidDataSource
-#          druid:
-#            initial-size: 5
-#            min-idle: 5
-#            max-active: 20
+        # 从数据源1(SQLite 密钥数据库)
+        slave1:
+          driver-class-name: org.sqlite.JDBC
+          url: jdbc:sqlite:E:/project/国企上报/0025_1001_20251121.db
+          # SQLite 不需要用户名密码
+          username:
+          password:
+          type: com.alibaba.druid.pool.DruidDataSource
+          druid:
+            initial-size: 1
+            min-idle: 1
+            max-active: 5
+            max-wait: 60000
+            # SQLite 不支持标准的 validation query，使用 SELECT 1
+            validation-query: SELECT 1
+            test-while-idle: true
+            test-on-borrow: false
+            test-on-return: false
 #
 #        # 从数据源2(外部系统数据库 - PostgreSQL示例)
 #        slave2:
@@ -74,15 +81,16 @@ spring:
   #     - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
   #     - org.redisson.spring.starter.RedissonAutoConfiguration
 
-mybatis-plus:
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+# MyBatis-Plus SQL日志开关（已在 application.yml 中配置）
+#mybatis-plus:
+#  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 logging:
   level:
     root: INFO
-    com.company.datareport: DEBUG
-    com.baomidou.dynamic: DEBUG
+    com.company.datareport: INFO
+    com.baomidou.dynamic: INFO
 
 # 应用自定义配置
 app:
@@ -98,15 +106,19 @@ app:
     auth-key: your-auth-key
     # 请求超时时间(秒)
     timeout: 30
+    #sm2密钥
+    sm2-key:
+      152E1DD4EBB0978B62CCEF3F16C47BB31A8455EAD47FADE3B122A2F15EDB346B4614A3B442B607B0A2F296113AB0CD97ABE99049990E9B0E61F33DC4BC735909
+    #sm4密钥
+    sm4-key:
+      5b2ee70a2cd34d109ba1fb0a03bd6971
 
   # 任务调度配置
   scheduler:
     # 是否启用定时任务
     enabled: true
-    # 任务拉取Cron表达式(每天凌晨1点执行)
-    task-fetch-cron: 0 0 1 * * ?
     # 数据上报Cron表达式(每天凌晨3点执行)
-    data-upload-cron: 0 0 3 * * ?
+    data-upload-cron: 0 0 4 * * ?
 
   # 重试配置
   retry:
@@ -117,7 +129,24 @@ app:
 
   # 文件上传配置
   upload:
-    # 临时文件存储路径
-    temp-path: /tmp/datareport
+    # 上传文件存储路径
+    upload-path: E:/project/国企上报/upload/
+    # 文件上传临时目录
+    temp-path: E:/project/国企上报/temp/
     # 单文件最大大小(MB)
-    max-file-size: 50
+    max-file-size: 500
+
+  # SQLite 数据库文件配置
+  sqlite:
+    # SQLite 数据库文件路径
+    file-path: E:/project/国企上报/0025_1001_20251121.db
+
+  #上报企业名称和编码
+  corporate:
+    name: 南京市雨花台区人民政府国有资产监督管理办公室
+    code: 11320114745362524W
+
+
+
+
+

@@ -6,7 +6,6 @@ import org.bouncycastle.crypto.params.ECDomainParameters;
 import org.bouncycastle.crypto.params.ECKeyGenerationParameters;
 import org.bouncycastle.math.ec.ECCurve;
 import org.bouncycastle.math.ec.ECFieldElement;
-import org.bouncycastle.math.ec.ECFieldElement.Fp;
 import org.bouncycastle.math.ec.ECPoint;
 
 import java.math.BigInteger;
@@ -61,12 +60,13 @@ public class SM2
         this.ecc_gx = new BigInteger(ecc_param[4], 16);
         this.ecc_gy = new BigInteger(ecc_param[5], 16);
 
-        this.ecc_gx_fieldelement = new Fp(this.ecc_p, this.ecc_gx);
-        this.ecc_gy_fieldelement = new Fp(this.ecc_p, this.ecc_gy);
-
         this.ecc_curve = new ECCurve.Fp(this.ecc_p, this.ecc_a, this.ecc_b);
         // 修改：使用 createPoint 方法创建点，而不是直接使用 ECPoint.Fp 构造函数
         this.ecc_point_g = this.ecc_curve.createPoint(this.ecc_gx, this.ecc_gy);
+
+        // 从曲线点获取 field element（兼容新版本 BouncyCastle）
+        this.ecc_gx_fieldelement = this.ecc_point_g.getAffineXCoord();
+        this.ecc_gy_fieldelement = this.ecc_point_g.getAffineYCoord();
 
         this.ecc_bc_spec = new ECDomainParameters(this.ecc_curve, this.ecc_point_g, this.ecc_n);
 

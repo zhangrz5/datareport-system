@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.company.datareport.mapper.data.DataQueryMapper">
+
+    <!-- 执行查询SQL，返回多行结果 -->
+    <select id="executeQuery" resultType="map">
+        ${sql}
+    </select>
+
+    <!-- 执行查询SQL，返回多行结果（支持动态参数） -->
+    <select id="executeQueryWithParams" resultType="map">
+        <![CDATA[${sql}]]>
+    </select>
+
+    <!-- 执行查询SQL，返回单行结果 -->
+    <select id="executeQueryOne" resultType="map">
+        ${sql}
+    </select>
+
+    <!-- 执行查询SQL，返回单行结果（支持动态参数） -->
+    <select id="executeQueryOneWithParams" resultType="map">
+        <![CDATA[${sql}]]>
+    </select>
+
+    <!-- 执行更新SQL -->
+    <update id="executeUpdate">
+        ${sql}
+    </update>
+
+    <!-- 执行更新SQL（支持动态参数） -->
+    <update id="executeUpdateWithParams">
+        <![CDATA[${sql}]]>
+    </update>
+
+    <!-- 动态查询数据 -->
+    <select id="queryDynamicData" resultType="map">
+        SELECT * FROM ${tableName}
+        <if test="whereClause != null and whereClause != ''">
+            WHERE ${whereClause}
+        </if>
+        <if test="orderBy != null and orderBy != ''">
+            ORDER BY ${orderBy}
+        </if>
+        <if test="limit != null and limit > 0">
+            LIMIT #{limit}
+        </if>
+    </select>
+
+    <!-- 查询数据总数 -->
+    <select id="queryDataCount" resultType="long">
+        SELECT COUNT(*) FROM ${tableName}
+        <if test="whereClause != null and whereClause != ''">
+            WHERE ${whereClause}
+        </if>
+    </select>
+
+</mapper>

@@ -10,10 +10,14 @@ server:
 spring:
   application:
     name: datareport-system
-  
+
   profiles:
     active: dev
-  
+
+  # 引入SQL配置文件
+  config:
+    import:
+      - classpath:sql-config.yml
 
   # Redis 配置 (可选 - 用于分布式锁)
   # 如果不配置Redis,系统将以单机模式运行,定时任务不使用分布式锁
@@ -49,7 +53,7 @@ mybatis-plus:
     # 驼峰命名转换
     map-underscore-to-camel-case: true
     # 日志输出
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    #log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     # 默认枚举处理器
     default-enum-type-handler: com.baomidou.mybatisplus.core.handlers.MybatisEnumTypeHandler
   # 全局配置

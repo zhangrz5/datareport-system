@@ -22,7 +22,7 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 @EnableScheduling
 @EnableAsync
 @EnableRetry
-@MapperScan("com.company.datareport.mapper")
+@MapperScan("com.company.datareport.mapper.**")
 public class DataReportApplication {
 
     public static void main(String[] args) {

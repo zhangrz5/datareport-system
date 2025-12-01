@@ -1,0 +1,373 @@
+# SQL配置文件
+# 用于统一管理项目中的SQL语句，避免硬编码
+
+sql:
+  # 数据查询相关SQL
+  query:
+    #数据任务相关
+    dataTask:
+      #获取数据任务最后时间
+      getLastTime: >
+        SELECT SYNC_TIME FROM SYNC_RECORD where table_name = #{params.param0}
+      #获取基础信息主表新增数据,注意其中获取的DATASTATE是用来判断数据是新增、原有等数据状态的，不需要上报
+      SASAORGANIZATIONS: >
+        SELECT
+          ID,
+          CODE,
+          NAME_CHS,
+          SHORTNAME_CHS,
+          scc,
+          NAME_EN,
+          SHORTNAME_EN,
+          orgform,
+          companytype,
+          unittype,
+          founddate,
+          operatebegin,
+          operateend,
+          registeredcapital,
+          sdcapital,
+          sdregister,
+          EXT_51_LV9,
+          currency,
+          isinandoutboundary,
+          ofcontinent,
+          ofcountry,
+          ofregion,
+          postaddressclob,
+          busscopeclob,
+          ofindustrymuti,
+          EXT_25_LV9,
+          isshellcompany,
+          shellcomtype,
+          EXT_36_LV9,
+          EXT_35_LV9,
+          EXT_53_LV9,
+          personnum,
+          officialwebsite,
+          isonmarket,
+          ismanager,
+          directorate,
+          EXT_30_LV9,
+          governancestructure,
+          requirementsforeign,
+          EXT_32_LV9,
+          EXT_31_LV9,
+          ifgroupunit,
+          EXT_27_LV9,
+          EXT_54_LV9,
+          EXT_26_LV9,
+          EXT_34_LV9,
+          EXT_24_LV9,
+          EXT_33_LV9,
+          parentcompany,
+          sdpnodeorg,
+          managelevel,
+          membershipgroup,
+          sdorgnumber,
+          propertyrightlevel,
+          majorinvestor,
+          sdholderorg,
+          majorratio,
+          EXT_41_LV9,
+          EXT_40_LV9,
+          EXT_52_LV9,
+          conaccounts,
+          EXT_23_LV9,
+          EXT_8_LV9,
+          EXT_2_LV9,
+          EXT_50_LV9,
+          EXT_20_LV9,
+          EXT_21_LV9,
+          EXT_5_LV9,
+          EXT_1_LV9,
+          busscale,
+          managementform,
+          operatingactivities,
+          funcat,
+          ismasterbusclob,
+          EXT_48_LV9,
+          EXT_45_LV9,
+          EXT_47_LV9,
+          EXT_44_LV9,
+          EXT_46_LV9,
+          timestamp_createdon,
+          timestamp_lastchangedon,
+          addtype,
+          canceltype,
+          remark,
+          timestamp_createdby,
+          timestamp_lastchangedby,
+          path_isdetail,
+          path_layer,
+          path_parentelement,
+          path_sequence,
+          pathcode_path,
+          NULL AS CHECKSTATUS,
+          EXT_61_LV9,
+          EXT_62_LV9,
+          DATASTATE,
+          TIMESTAMP_CREATEDON,
+          TIMESTAMP_LASTCHANGEDON
+        FROM
+          SASAORGANIZATIONS 
+        WHERE
+          TIMESTAMP_CREATEDON  BETWEEN #{params.param0} AND #{params.param1}
+      #获取股权结构新增数据,注意其中获取的DATASTATE是用来判断数据是新增、原有等数据状态的，不需要上报
+      SASAOWNERSHIP: >
+        SELECT
+          ParentID,
+          ID,
+          stockholder,
+          ofcountry,
+          shareholdnature,
+          ownershipratio,
+          orgform,
+          ownershipscc,
+          paidcapital,
+          subscribedcapital,
+          DATASTATE,
+          TIMESTAMP_CREATEDON,
+          TIMESTAMP_LASTCHANGEDON
+        FROM
+          SASAOWNERSHIP
+        WHERE
+          TIMESTAMP_CREATEDON  BETWEEN #{params.param0} AND #{params.param1}
+      #获取人员信息新增数据,注意其中获取的DATASTATE是用来判断数据是新增、原有等数据状态的，不需要上报
+      SASAPERSONNEL: >
+        SELECT
+          ParentID,
+          ID,
+          linkman,
+          linktelephone,
+          email,
+          isrepresentative,
+          DATASTATE,
+          TIMESTAMP_CREATEDON,
+          TIMESTAMP_LASTCHANGEDON
+        FROM
+          SASAPERSONNEL
+        WHERE
+          TIMESTAMP_CREATEDON  BETWEEN #{params.param0} AND #{params.param1}
+      #获取对外投资新增数据,注意其中获取的DATASTATE是用来判断数据是新增、原有等数据状态的，不需要上报
+      SASAEQUITYPART: >
+        SELECT
+          ParentID,
+          ID,
+          partorg,
+          partinandoutbound,
+          partiunittype,
+          partshipratio,
+          DATASTATE,
+          TIMESTAMP_CREATEDON,
+          TIMESTAMP_LASTCHANGEDON
+        FROM
+          SASAEQUITYPART
+        WHERE
+          TIMESTAMP_CREATEDON  BETWEEN #{params.param0} AND #{params.param1}
+      #获取组织体系新增数据
+      SASALAYERSTR: >
+        SELECT
+          ParentID,
+          ID,
+          orgsysid,
+          pnodeid,
+          isdetail,
+          isfirst,
+          layer,
+          sequence,
+          remark,
+          TIMESTAMP_CREATEDON,
+          TIMESTAMP_LASTCHANGEDON
+        FROM
+          SASALAYERSTR
+        WHERE
+          TIMESTAMP_CREATEDON  BETWEEN #{params.param0} AND #{params.param1}
+        
+
+  # 数据更新相关SQL
+  update:
+    dataTask:
+      updateLastTime: >
+        UPDATE   SYNC_RECORD SET SYNC_TIME = #{params.param1},SYNC_COUNT = #{params.param2}  where table_name = #{params.param0} 
+
+  # 数据插入相关SQL
+  insert:
+    person:
+      insertOne: >
+        INSERT INTO person_info
+        (id, person_name, id_card, phone, email, address, create_time, update_time, delete_flag)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
+
+      batchInsert: >
+        INSERT INTO person_info
+        (id, person_name, id_card, phone, email, address, create_time, update_time, delete_flag)
+        VALUES
+
+    organization:
+      insertOne: >
+        INSERT INTO organization_info
+        (id, org_name, org_code, unified_social_credit_code, parent_id, org_level, create_time, update_time, delete_flag)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
+
+    equity:
+      insertOne: >
+        INSERT INTO equity_info
+        (id, org_id, person_id, equity_ratio, investment_amount, create_time, update_time, delete_flag)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
+
+
+
+  # 数据删除相关SQL（逻辑删除）
+  delete:
+    person:
+      deleteById: >
+        UPDATE person_info
+        SET delete_flag = 1, update_time = ?
+        WHERE id = ?
+
+      batchDelete: >
+        UPDATE person_info
+        SET delete_flag = 1, update_time = ?
+        WHERE id IN
+
+    organization:
+      deleteById: >
+        UPDATE organization_info
+        SET delete_flag = 1, update_time = ?
+        WHERE id = ?
+
+    equity:
+      deleteById: >
+        UPDATE equity_info
+        SET delete_flag = 1, update_time = ?
+        WHERE id = ?
+
+  # 统计分析相关SQL
+  statistics:
+    person:
+      count: >
+        SELECT COUNT(*) FROM person_info WHERE delete_flag = 0
+
+      countByCondition: >
+        SELECT COUNT(*) FROM person_info WHERE 1=1 AND delete_flag = 0
+
+      groupByStatus: >
+        SELECT status, COUNT(*) as count
+        FROM person_info
+        WHERE delete_flag = 0
+        GROUP BY status
+
+    organization:
+      count: >
+        SELECT COUNT(*) FROM organization_info WHERE delete_flag = 0
+
+      countByLevel: >
+        SELECT org_level, COUNT(*) as count
+        FROM organization_info
+        WHERE delete_flag = 0
+        GROUP BY org_level
+
+    equity:
+      sumByOrg: >
+        SELECT org_id, SUM(investment_amount) as total_investment
+        FROM equity_info
+        WHERE delete_flag = 0
+        GROUP BY org_id
+
+      avgEquityRatio: >
+        SELECT AVG(equity_ratio) as avg_ratio
+        FROM equity_info
+        WHERE delete_flag = 0
+
+  # SQLite相关SQL（针对hadwn表）
+  sqlite:
+    hadwnIndx:
+      selectAll: >
+        SELECT * FROM hadwn_indx_tab ORDER BY create_time DESC
+
+      selectByBatchNo: >
+        SELECT * FROM hadwn_indx_tab WHERE batch_no = ?
+
+      insertOne: >
+        INSERT INTO hadwn_indx_tab
+        (id, batch_no, table_name, record_count, status, create_time)
+        VALUES (?, ?, ?, ?, ?, ?)
+
+    hadwnInfoRes:
+      selectByBatchNo: >
+        SELECT * FROM hadwn_info_res_tab WHERE batch_no = ?
+
+      insertBatch: >
+        INSERT INTO hadwn_info_res_tab
+        (id, batch_no, data_type, data_content, create_time)
+        VALUES
+
+    hadwnRestGathr:
+      selectPendingTasks: >
+        SELECT * FROM hadwn_rest_gathr_tab
+        WHERE status = 0
+        ORDER BY create_time ASC
+
+      updateStatus: >
+        UPDATE hadwn_rest_gathr_tab
+        SET status = ?, update_time = ?
+        WHERE id = ?
+
+  # 复杂业务查询SQL
+  business:
+    # 获取完整的组织架构及人员信息
+    getOrgWithPersons: >
+      SELECT
+        o.id as org_id, o.org_name, o.org_code,
+        p.id as person_id, p.person_name, p.id_card,
+        e.equity_ratio, e.investment_amount
+      FROM organization_info o
+      LEFT JOIN equity_info e ON o.id = e.org_id AND e.delete_flag = 0
+      LEFT JOIN person_info p ON e.person_id = p.id AND p.delete_flag = 0
+      WHERE o.delete_flag = 0
+      ORDER BY o.id, e.equity_ratio DESC
+
+    # 获取数据上报记录
+    getUploadRecords: >
+      SELECT
+        f.id, f.file_name, f.upload_time, f.status,
+        i.interface_name, i.interface_url,
+        l.request_data, l.response_data, l.status_code
+      FROM file_upload_record f
+      LEFT JOIN interface_config i ON f.interface_id = i.id
+      LEFT JOIN interface_log l ON f.id = l.upload_record_id
+      WHERE f.delete_flag = 0
+      ORDER BY f.upload_time DESC
+
+    # 数据采集进度查询
+    getCollectionProgress: >
+      SELECT
+        batch_no,
+        COUNT(*) as total_count,
+        SUM(CASE WHEN status = 2 THEN 1 ELSE 0 END) as completed_count,
+        SUM(CASE WHEN status = 3 THEN 1 ELSE 0 END) as failed_count
+      FROM hadwn_rest_gathr_tab
+      GROUP BY batch_no
+      ORDER BY batch_no DESC
+
+# 动态SQL条件配置
+sql-conditions:
+  # 常用的WHERE条件片段
+  common:
+    notDeleted: "AND delete_flag = 0"
+    timeRange: "AND create_time BETWEEN ? AND ?"
+    statusIn: "AND status IN (?, ?, ?)"
+    likeSearch: "AND ${column} LIKE CONCAT('%', ?, '%')"
+
+  # 排序条件
+  orderBy:
+    createTimeDesc: "ORDER BY create_time DESC"
+    createTimeAsc: "ORDER BY create_time ASC"
+    updateTimeDesc: "ORDER BY update_time DESC"
+    nameAsc: "ORDER BY name ASC"
+
+  # 分页条件
+  pagination:
+    mysql: "LIMIT ? OFFSET ?"
+    sqlserver: "OFFSET ? ROWS FETCH NEXT ? ROWS ONLY"
