@@ -1,4 +1,4 @@
--- 增量同步记录表（每次同步插入一条）
+-- 同步记录表（每次同步插入一条）
 CREATE TABLE sync_record (
                              id              INT IDENTITY(1,1) PRIMARY KEY,
                              table_name      VARCHAR(100) NOT NULL,

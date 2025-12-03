@@ -38,9 +38,9 @@ public class SM2Utils {
 
         Cipher cipher = new Cipher();
         SM2 sm2 = SM2.Instance();
-        ECPoint userKey = sm2.ecc_curve.decodePoint(formatedPubKey);
+        ECPoint userKey = sm2.ecc_curve.decodePoint(formatedPubKey).normalize();
 
-        ECPoint c1 = cipher.Init_enc(sm2, userKey);
+        ECPoint c1 = cipher.Init_enc(sm2, userKey).normalize();
         cipher.Encrypt(source);
         byte[] c3 = new byte[32];
         cipher.Dofinal(c3);
@@ -222,7 +222,7 @@ public class SM2Utils {
             formatedPubKey = publicKey;
 
         SM2 sm2 = SM2.Instance();
-        ECPoint userKey = sm2.ecc_curve.decodePoint(formatedPubKey);
+        ECPoint userKey = sm2.ecc_curve.decodePoint(formatedPubKey).normalize();
 
         SM3Digest sm3 = new SM3Digest();
         byte[] z = sm2.sm2GetZ(userId, userKey);

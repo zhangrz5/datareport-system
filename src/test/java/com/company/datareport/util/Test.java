@@ -5,7 +5,7 @@ import com.company.datareport.util.sm4.SM4Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 @Slf4j
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)

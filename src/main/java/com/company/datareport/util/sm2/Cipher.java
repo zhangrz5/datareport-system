@@ -8,99 +8,104 @@ import org.bouncycastle.math.ec.ECPoint;
 
 import java.math.BigInteger;
 
-public class Cipher 
+public class Cipher
 {
-	private int ct;
-	private ECPoint p2;
-	private SM3Digest sm3keybase;
-	private SM3Digest sm3c3;
-	private byte key[];
-	private byte keyOff;
+    private int ct;
+    private ECPoint p2;
+    private SM3Digest sm3keybase;
+    private SM3Digest sm3c3;
+    private byte key[];
+    private byte keyOff;
 
-	public Cipher() 
-	{
-		this.ct = 1;
-		this.key = new byte[32];
-		this.keyOff = 0;
-	}
+    public Cipher()
+    {
+        this.ct = 1;
+        this.key = new byte[32];
+        this.keyOff = 0;
+    }
 
-	private void Reset() 
-	{
-		this.sm3keybase = new SM3Digest();
-		this.sm3c3 = new SM3Digest();
-		
-		byte p[] = ByteUtil.byteConvert32Bytes(p2.getAffineXCoord().toBigInteger());
-		this.sm3keybase.update(p, 0, p.length);
-		this.sm3c3.update(p, 0, p.length);
-		
-		p = ByteUtil.byteConvert32Bytes(p2.getAffineYCoord().toBigInteger());
-		this.sm3keybase.update(p, 0, p.length);
-		this.ct = 1;
-		NextKey();
-	}
+    private void Reset()
+    {
+        this.sm3keybase = new SM3Digest();
+        this.sm3c3 = new SM3Digest();
 
-	private void NextKey() 
-	{
-		SM3Digest sm3keycur = new SM3Digest(this.sm3keybase);
-		sm3keycur.update((byte) (ct >> 24 & 0xff));
-		sm3keycur.update((byte) (ct >> 16 & 0xff));
-		sm3keycur.update((byte) (ct >> 8 & 0xff));
-		sm3keycur.update((byte) (ct & 0xff));
-		sm3keycur.doFinal(key, 0);
-		this.keyOff = 0;
-		this.ct++;
-	}
+        // 添加 normalize()
+        ECPoint p2Normalized = p2.normalize();
 
-	public ECPoint Init_enc(SM2 sm2, ECPoint userKey) 
-	{
-		AsymmetricCipherKeyPair key = sm2.ecc_key_pair_generator.generateKeyPair();
-		ECPrivateKeyParameters ecpriv = (ECPrivateKeyParameters) key.getPrivate();
-		ECPublicKeyParameters ecpub = (ECPublicKeyParameters) key.getPublic();
-		BigInteger k = ecpriv.getD();
-		ECPoint c1 = ecpub.getQ();
-		this.p2 = userKey.multiply(k);
-		Reset();
-		return c1;
-	}
+        byte p[] = ByteUtil.byteConvert32Bytes(p2Normalized.getAffineXCoord().toBigInteger());
+        this.sm3keybase.update(p, 0, p.length);
+        this.sm3c3.update(p, 0, p.length);
 
-	public void Encrypt(byte data[]) 
-	{
-		this.sm3c3.update(data, 0, data.length);
-		for (int i = 0; i < data.length; i++) 
-		{
-			if (keyOff == key.length)
-			{
-				NextKey();
-			}
-			data[i] ^= key[keyOff++];
-		}
-	}
+        p = ByteUtil.byteConvert32Bytes(p2Normalized.getAffineYCoord().toBigInteger());
+        this.sm3keybase.update(p, 0, p.length);
+        this.ct = 1;
+        NextKey();
+    }
 
-	public void Init_dec(BigInteger userD, ECPoint c1)
-	{
-		this.p2 = c1.multiply(userD);
-		Reset();
-	}
+    private void NextKey()
+    {
+        SM3Digest sm3keycur = new SM3Digest(this.sm3keybase);
+        sm3keycur.update((byte) (ct >> 24 & 0xff));
+        sm3keycur.update((byte) (ct >> 16 & 0xff));
+        sm3keycur.update((byte) (ct >> 8 & 0xff));
+        sm3keycur.update((byte) (ct & 0xff));
+        sm3keycur.doFinal(key, 0);
+        this.keyOff = 0;
+        this.ct++;
+    }
 
-	public void Decrypt(byte data[]) 
-	{
-		for (int i = 0; i < data.length; i++)
-		{
-			if (keyOff == key.length)
-			{
-				NextKey();
-			}
-			data[i] ^= key[keyOff++];
-		}
+    public ECPoint Init_enc(SM2 sm2, ECPoint userKey)
+    {
+        AsymmetricCipherKeyPair key = sm2.ecc_key_pair_generator.generateKeyPair();
+        ECPrivateKeyParameters ecpriv = (ECPrivateKeyParameters) key.getPrivate();
+        ECPublicKeyParameters ecpub = (ECPublicKeyParameters) key.getPublic();
+        BigInteger k = ecpriv.getD();
+        ECPoint c1 = ecpub.getQ();
+        this.p2 = userKey.multiply(k);
+        Reset();
+        return c1.normalize();  // 返回值也 normalize
+    }
 
-		this.sm3c3.update(data, 0, data.length);
-	}
+    public void Encrypt(byte data[])
+    {
+        this.sm3c3.update(data, 0, data.length);
+        for (int i = 0; i < data.length; i++)
+        {
+            if (keyOff == key.length)
+            {
+                NextKey();
+            }
+            data[i] ^= key[keyOff++];
+        }
+    }
 
-	public void Dofinal(byte c3[]) 
-	{
-		byte p[] = ByteUtil.byteConvert32Bytes(p2.getAffineYCoord().toBigInteger());
-		this.sm3c3.update(p, 0, p.length);
-		this.sm3c3.doFinal(c3, 0);
-		Reset();
-	}
+    public void Init_dec(BigInteger userD, ECPoint c1)
+    {
+        this.p2 = c1.multiply(userD);
+        Reset();
+    }
+
+    public void Decrypt(byte data[])
+    {
+        for (int i = 0; i < data.length; i++)
+        {
+            if (keyOff == key.length)
+            {
+                NextKey();
+            }
+            data[i] ^= key[keyOff++];
+        }
+
+        this.sm3c3.update(data, 0, data.length);
+    }
+
+    public void Dofinal(byte c3[])
+    {
+        // 添加 normalize()
+        ECPoint p2Normalized = p2.normalize();
+        byte p[] = ByteUtil.byteConvert32Bytes(p2Normalized.getAffineYCoord().toBigInteger());
+        this.sm3c3.update(p, 0, p.length);
+        this.sm3c3.doFinal(c3, 0);
+        Reset();
+    }
 }

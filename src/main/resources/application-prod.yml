@@ -37,5 +37,9 @@ app:
     upload-url: ${PLATFORM_UPLOAD_URL:http://platform.example.com/api/upload}
     enterprise-code: ${ENTERPRISE_CODE:ENTERPRISE_001}
     auth-key: ${PLATFORM_AUTH_KEY:your-auth-key}
+    #sm2密钥
+    sm2-key: ${SM2_KEY:04F6E0C3345AE42B51E06BF50B98834988D54EBC7460FE135A48171BC0629EAE205EEDE253A530608178A98F1E19BB737302813BA39ED3FA3C51639D7A20C7391A}
+    #sm4密钥
+    sm4-key: ${SM4_KEY:5b2ee70a2cd34d109ba1fb0a03bd6971}
   scheduler:
     enabled: ${SCHEDULER_ENABLED:true}

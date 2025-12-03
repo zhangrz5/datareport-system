@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据采集系统监控中心</title>
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --info-color: #4895ef;
+            --warning-color: #f72585;
+            --danger-color: #e63946;
+            --light-bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text-primary: #2b2d42;
+            --text-secondary: #8d99ae;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .navbar {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.04);
+            padding: 1rem 2rem;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color);
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .main-container {
+            padding: 2rem;
+            max-width: 1600px;
+            margin: 0 auto;
+        }
+
+        /* Stats Cards */
+        .stats-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: none;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+        }
+
+        .stats-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .stats-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.25rem;
+            color: var(--text-primary);
+        }
+
+        .stats-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .stats-footer {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.8rem;
+        }
+
+        /* Content Card */
+        .content-card {
+            background: var(--card-bg);
+            border-radius: 16px;
+            border: none;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+            margin-top: 2rem;
+            overflow: hidden;
+        }
+
+        .card-header {
+            background: transparent;
+            border-bottom: 1px solid #f0f0f0;
+            padding: 1.5rem;
+        }
+
+        /* Tabs */
+        .nav-tabs {
+            border-bottom: none;
+            gap: 1rem;
+        }
+
+        .nav-link {
+            border: none;
+            color: var(--text-secondary);
+            font-weight: 500;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px !important;
+            transition: all 0.2s;
+        }
+
+        .nav-link:hover {
+            color: var(--primary-color);
+            background: rgba(67, 97, 238, 0.05);
+        }
+
+        .nav-link.active {
+            color: #fff !important;
+            background: var(--primary-color) !important;
+            box-shadow: 0 4px 12px rgba(67, 97, 238, 0.3);
+        }
+
+        /* Table */
+        .table {
+            margin-bottom: 0;
+            vertical-align: middle;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: var(--text-secondary);
+            border-bottom: 1px solid #edf2f7;
+            padding: 1rem;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .table td {
+            padding: 1rem;
+            border-bottom: 1px solid #edf2f7;
+            color: var(--text-primary);
+            font-size: 0.9rem;
+        }
+
+        .table tr:hover td {
+            background-color: #f8f9fa;
+        }
+
+        /* Status Badges */
+        .badge {
+            padding: 0.5em 0.8em;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.75rem;
+        }
+
+        .badge-success {
+            background: rgba(76, 201, 240, 0.1);
+            color: #00b4d8;
+        }
+
+        .badge-danger {
+            background: rgba(230, 57, 70, 0.1);
+            color: #e63946;
+        }
+
+        .badge-warning {
+            background: rgba(247, 37, 133, 0.1);
+            color: #f72585;
+        }
+
+        .badge-info {
+            background: rgba(67, 97, 238, 0.1);
+            color: #4361ee;
+        }
+
+        /* Pagination */
+        .pagination {
+            margin-bottom: 0;
+            gap: 5px;
+        }
+
+        .page-link {
+            border: none;
+            border-radius: 8px;
+            color: var(--text-secondary);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 500;
+        }
+
+        .page-link:hover {
+            background: #f0f0f0;
+            color: var(--primary-color);
+        }
+
+        .page-item.active .page-link {
+            background: var(--primary-color);
+            color: #fff;
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+        }
+
+        .page-item.disabled .page-link {
+            background: transparent;
+            color: #d1d5db;
+        }
+
+        /* Loading Overlay */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            border-radius: 16px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-out forwards;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <!-- Navbar -->
+        <nav class="navbar fixed-top">
+            <div class="container-fluid">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-chart-network"></i>
+                    数据采集系统监控中心
+                </a>
+                <div class="d-flex align-items-center gap-3">
+                    <span class="text-secondary small">
+                        <i class="far fa-clock me-1"></i> {{ currentTime }}
+                    </span>
+                    <button class="btn btn-light btn-sm rounded-circle" @click="refreshAll" title="刷新数据">
+                        <i class="fas fa-sync-alt" :class="{ 'fa-spin': loading }"></i>
+                    </button>
+                </div>
+            </div>
+        </nav>
+
+        <div class="main-container" style="margin-top: 60px;">
+            <!-- Stats Row -->
+            <div class="row g-4 mb-4">
+                <!-- Sync Stats -->
+                <div class="col-12 col-md-6 col-lg-20 fade-in" style="animation-delay: 0.1s; width: 20%;">
+                    <div class="stats-card">
+                        <div class="stats-icon"
+                            style="background: rgba(67, 97, 238, 0.1); color: var(--primary-color);">
+                            <i class="fas fa-sync"></i>
+                        </div>
+                        <div class="stats-value">{{ stats.syncTotal || 0 }}</div>
+                        <div class="stats-label">数据同步总数</div>
+                        <div class="stats-footer">
+                            <span class="text-success"><i class="fas fa-check-circle me-1"></i>{{ stats.syncSuccess || 0
+                                }} 成功</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Report Stats -->
+                <div class="col-12 col-md-6 col-lg-20 fade-in" style="animation-delay: 0.2s; width: 20%;">
+                    <div class="stats-card">
+                        <div class="stats-icon"
+                            style="background: rgba(76, 201, 240, 0.1); color: var(--success-color);">
+                            <i class="fas fa-file-export"></i>
+                        </div>
+                        <div class="stats-value">{{ stats.reportTotal || 0 }}</div>
+                        <div class="stats-label">数据上报总数</div>
+                        <div class="stats-footer">
+                            <span class="text-success"><i class="fas fa-check-circle me-1"></i>{{ stats.reportSuccess ||
+                                0 }} 成功</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Upload Stats -->
+                <div class="col-12 col-md-6 col-lg-20 fade-in" style="animation-delay: 0.3s; width: 20%;">
+                    <div class="stats-card">
+                        <div class="stats-icon"
+                            style="background: rgba(247, 37, 133, 0.1); color: var(--warning-color);">
+                            <i class="fas fa-cloud-upload-alt"></i>
+                        </div>
+                        <div class="stats-value">{{ stats.uploadTotal || 0 }}</div>
+                        <div class="stats-label">文件上传总数</div>
+                        <div class="stats-footer">
+                            <span class="text-success"><i class="fas fa-check-circle me-1"></i>{{ stats.uploadSuccess ||
+                                0 }} 成功</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notice Stats -->
+                <div class="col-12 col-md-6 col-lg-20 fade-in" style="animation-delay: 0.4s; width: 20%;">
+                    <div class="stats-card">
+                        <div class="stats-icon" style="background: rgba(255, 159, 28, 0.1); color: #ff9f1c;">
+                            <i class="fas fa-download"></i>
+                        </div>
+                        <div class="stats-value">{{ stats.noticeTotal || 0 }}</div>
+                        <div class="stats-label">通知下载总数</div>
+                        <div class="stats-footer">
+                            <span class="text-success"><i class="fas fa-check-circle me-1"></i>{{ stats.noticeSuccess ||
+                                0 }} 成功</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Push Stats -->
+                <div class="col-12 col-md-6 col-lg-20 fade-in" style="animation-delay: 0.5s; width: 20%;">
+                    <div class="stats-card">
+                        <div class="stats-icon" style="background: rgba(230, 57, 70, 0.1); color: var(--danger-color);">
+                            <i class="fas fa-paper-plane"></i>
+                        </div>
+                        <div class="stats-value">{{ stats.pushTotal || 0 }}</div>
+                        <div class="stats-label">推送日志总数</div>
+                        <div class="stats-footer">
+                            <span class="text-success"><i class="fas fa-check-circle me-1"></i>{{ stats.pushSuccess || 0
+                                }} 成功</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="content-card fade-in" style="animation-delay: 0.6s;">
+                <div class="card-header">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item" v-for="tab in tabs" :key="tab.id">
+                            <a class="nav-link" :class="{ active: currentTab === tab.id }" href="#"
+                                @click.prevent="switchTab(tab.id)">
+                                <i :class="tab.icon" class="me-2"></i>{{ tab.name }}
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card-body p-0 position-relative" style="min-height: 400px;">
+                    <!-- Loading Overlay -->
+                    <div v-if="tableLoading" class="loading-overlay">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+
+                    <!-- Sync Table -->
+                    <div v-if="currentTab === 'sync'" class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>表名</th>
+                                    <th>同步截止时间</th>
+                                    <th>同步数量</th>
+                                    <th>状态</th>
+                                    <th>创建时间</th>
+                                    <th>备注</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="item in tableData" :key="item.id">
+                                    <td>{{ item.id }}</td>
+                                    <td><span class="fw-medium">{{ item.tableName }}</span></td>
+                                    <td><span class="text-primary fw-bold">{{ formatTime(item.syncTime) }}</span></td>
+                                    <td>{{ item.syncCount }}</td>
+                                    <td>
+                                        <span class="badge"
+                                            :class="item.syncStatus === 1 ? 'badge-success' : 'badge-danger'">
+                                            {{ item.syncStatus === 1 ? '成功' : '失败' }}
+                                        </span>
+                                    </td>
+                                    <td class="text-muted">{{ formatTime(item.createTime) }}</td>
+                                    <td class="text-muted small">{{ item.remark }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Report Table -->
+                    <div v-if="currentTab === 'report'" class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>上报数量</th>
+                                    <th>上报状态</th>
+                                    <th>创建时间</th>
+                                    <th>更新时间</th>
+                                    <th>备注</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="item in tableData" :key="item.id">
+                                    <td>{{ item.id }}</td>
+                                    <td>{{ item.totalCount }}</td>
+                                    <td>
+                                        <span class="badge"
+                                            :class="item.isReported === 1 ? 'badge-success' : 'badge-warning'">
+                                            {{ item.isReported === 1 ? '已上报' : '未上报' }}
+                                        </span>
+                                    </td>
+                                    <td class="text-muted">{{ formatTime(item.createTime) }}</td>
+                                    <td class="text-muted">{{ formatTime(item.updateTime) }}</td>
+                                    <td class="text-muted small">{{ item.remark }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-link text-primary p-0"
+                                            @click="showDetail(item.reportDetail)" v-if="item.reportDetail">
+                                            查看详情
+                                        </button>
+                                        <span v-else class="text-muted">-</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Upload Table -->
+                    <div v-if="currentTab === 'upload'" class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>文件名</th>
+                                    <th>业务类型</th>
+                                    <th>大小</th>
+                                    <th>状态</th>
+                                    <th>创建时间</th>
+                                    <th>响应消息</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="item in tableData" :key="item.id">
+                                    <td>{{ item.id }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="far fa-file-alt me-2 text-secondary"></i>
+                                            <span class="text-truncate" style="max-width: 200px;"
+                                                :title="item.fileName">{{ item.fileName }}</span>
+                                        </div>
+                                    </td>
+                                    <td>{{ item.businessType }}</td>
+                                    <td>{{ formatSize(item.fileSize) }}</td>
+                                    <td>
+                                        <span class="badge" :class="getStatusClass(item.uploadStatus, 'upload')">
+                                            {{ getStatusText(item.uploadStatus, 'upload') }}
+                                        </span>
+                                    </td>
+                                    <td class="text-muted">{{ formatTime(item.createTime) }}</td>
+                                    <td class="text-muted small text-truncate" style="max-width: 150px;"
+                                        :title="item.responseMsg">{{ item.responseMsg }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Notice Table -->
+                    <div v-if="currentTab === 'notice'" class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>文件名</th>
+                                    <th>状态</th>
+                                    <th>响应消息</th>
+                                    <th>错误信息</th>
+                                    <th>请求时间</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="item in tableData" :key="item.id">
+                                    <td>{{ item.id }}</td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <i class="far fa-file-pdf me-2 text-secondary"></i>
+                                            <span class="text-truncate" style="max-width: 200px;"
+                                                :title="item.fileName">{{ item.fileName }}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge" :class="getStatusClass(item.downloadStatus, 'download')">
+                                            {{ getStatusText(item.downloadStatus, 'download') }}
+                                        </span>
+                                    </td>
+                                    <td class="text-muted small text-truncate" style="max-width: 150px;"
+                                        :title="item.responseMsg">{{ item.responseMsg }}</td>
+                                    <td class="text-danger small text-truncate" style="max-width: 150px;"
+                                        :title="item.errorMsg">{{ item.errorMsg }}</td>
+                                    <td class="text-muted">{{ formatTime(item.requestTime) }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Push Table -->
+                    <div v-if="currentTab === 'push'" class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>时间范围</th>
+                                    <th>状态</th>
+                                    <th>耗时(ms)</th>
+                                    <th>请求时间</th>
+                                    <th>错误信息</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr v-for="item in tableData" :key="item.id">
+                                    <td>{{ item.id }}</td>
+                                    <td>
+                                        <div class="small text-muted">{{ item.startDate }}</div>
+                                        <div class="small text-muted">{{ item.endDate }}</div>
+                                    </td>
+                                    <td>
+                                        <span class="badge"
+                                            :class="item.requestStatus === 1 ? 'badge-success' : 'badge-danger'">
+                                            {{ item.requestStatus === 1 ? '成功' : '失败' }}
+                                        </span>
+                                    </td>
+                                    <td>{{ item.costTime }}</td>
+                                    <td class="text-muted">{{ formatTime(item.requestTime) }}</td>
+                                    <td class="text-danger small text-truncate" style="max-width: 150px;"
+                                        :title="item.errorMsg">{{ item.errorMsg }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-link text-primary p-0"
+                                            @click="showDetail(item.responseJson)" v-if="item.responseJson">
+                                            查看JSON
+                                        </button>
+                                        <span v-else class="text-muted">-</span>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <div class="card-footer bg-white py-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted small">
+                            显示 {{ (currentPage - 1) * pageSize + 1 }} 到 {{ Math.min(currentPage * pageSize, total) }}
+                            条，共 {{ total }} 条
+                        </div>
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination">
+                                <li class="page-item" :class="{ disabled: currentPage === 1 }">
+                                    <a class="page-link" href="#" @click.prevent="changePage(currentPage - 1)">
+                                        <i class="fas fa-chevron-left"></i>
+                                    </a>
+                                </li>
+                                <li class="page-item" v-for="p in displayedPages" :key="p"
+                                    :class="{ active: currentPage === p }">
+                                    <a class="page-link" href="#" @click.prevent="changePage(p)">{{ p }}</a>
+                                </li>
+                                <li class="page-item" :class="{ disabled: currentPage === totalPages }">
+                                    <a class="page-link" href="#" @click.prevent="changePage(currentPage + 1)">
+                                        <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detail Modal -->
+        <div class="modal fade" id="detailModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <div class="modal-content border-0 shadow">
+                    <div class="modal-header border-bottom-0">
+                        <h5 class="modal-title fw-bold">详细信息</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body bg-light p-0">
+                        <pre class="m-0 p-3"
+                            style="max-height: 500px; overflow: auto; font-size: 0.85rem; color: #333;">{{ detailContent }}</pre>
+                    </div>
+                    <div class="modal-footer border-top-0">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <script>
+        const { createApp, ref, onMounted, computed, watch } = Vue;
+
+        createApp({
+            setup() {
+                // State
+                const loading = ref(false);
+                const tableLoading = ref(false);
+                const stats = ref({});
+                const currentTab = ref('sync');
+                const tableData = ref([]);
+                const currentPage = ref(1);
+                const pageSize = ref(10);
+                const total = ref(0);
+                const currentTime = ref('');
+                const detailContent = ref('');
+                let detailModal = null;
+
+                // Tabs Configuration
+                const tabs = [
+                    { id: 'sync', name: '同步记录', icon: 'fas fa-sync' },
+                    { id: 'report', name: '数据获取记录', icon: 'fas fa-file-export' },
+                    { id: 'upload', name: '文件上传记录', icon: 'fas fa-cloud-upload-alt' },
+                    { id: 'notice', name: '通知下载记录', icon: 'fas fa-download' },
+                    { id: 'push', name: '推送日志记录', icon: 'fas fa-paper-plane' }
+                ];
+
+                // Computed
+                const totalPages = computed(() => Math.ceil(total.value / pageSize.value));
+
+                const displayedPages = computed(() => {
+                    const delta = 2;
+                    const range = [];
+                    for (let i = Math.max(2, currentPage.value - delta); i <= Math.min(totalPages.value - 1, currentPage.value + delta); i++) {
+                        range.push(i);
+                    }
+                    if (currentPage.value - delta > 2) range.unshift('...');
+                    if (currentPage.value + delta < totalPages.value - 1) range.push('...');
+                    range.unshift(1);
+                    if (totalPages.value > 1) range.push(totalPages.value);
+                    return range.filter(p => typeof p === 'number'); // Simplified for this demo
+                });
+
+                // Methods
+                const updateTime = () => {
+                    const now = new Date();
+                    currentTime.value = now.toLocaleString('zh-CN', {
+                        year: 'numeric', month: '2-digit', day: '2-digit',
+                        hour: '2-digit', minute: '2-digit', second: '2-digit'
+                    });
+                };
+
+                const formatTime = (timeStr) => {
+                    if (!timeStr) return '-';
+                    return timeStr.replace('T', ' ');
+                };
+
+                const formatSize = (bytes) => {
+                    if (bytes === 0) return '0 B';
+                    const k = 1024;
+                    const sizes = ['B', 'KB', 'MB', 'GB'];
+                    const i = Math.floor(Math.log(bytes) / Math.log(k));
+                    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+                };
+
+                const getStatusText = (status, type) => {
+                    if (type === 'upload') {
+                        if (status === 2) return '成功';
+                        if (status === 3) return '失败';
+                        return '处理中';
+                    }
+                    if (type === 'download') {
+                        if (status === 1) return '成功';
+                        if (status === 2) return '失败';
+                        if (status === 3) return '无文件';
+                        return '下载中';
+                    }
+                    return status;
+                };
+
+                const getStatusClass = (status, type) => {
+                    if (type === 'upload') {
+                        if (status === 2) return 'badge-success';
+                        if (status === 3) return 'badge-danger';
+                        return 'badge-info';
+                    }
+                    if (type === 'download') {
+                        if (status === 1) return 'badge-success';
+                        if (status === 2) return 'badge-danger';
+                        if (status === 3) return 'badge-warning';
+                        return 'badge-info';
+                    }
+                    return '';
+                };
+
+                const fetchStats = async () => {
+                    try {
+                        const res = await axios.get('/monitor/statistics');
+                        stats.value = res.data;
+                    } catch (error) {
+                        console.error('Failed to fetch stats:', error);
+                    }
+                };
+
+                const fetchTableData = async () => {
+                    tableLoading.value = true;
+                    try {
+                        let url = '';
+                        switch (currentTab.value) {
+                            case 'sync': url = '/monitor/syncRecords'; break;
+                            case 'report': url = '/monitor/dataReportRecords'; break;
+                            case 'upload': url = '/monitor/fileUploadRecords'; break;
+                            case 'notice': url = '/monitor/noticeDownloadRecords'; break;
+                            case 'push': url = '/monitor/pushLogRecords'; break;
+                        }
+
+                        const res = await axios.get(url, {
+                            params: {
+                                page: currentPage.value,
+                                limit: pageSize.value
+                            }
+                        });
+
+                        if (res.data.code === 0) {
+                            tableData.value = res.data.data;
+                            total.value = res.data.count;
+                        }
+                    } catch (error) {
+                        console.error('Failed to fetch table data:', error);
+                    } finally {
+                        tableLoading.value = false;
+                    }
+                };
+
+                const switchTab = (tabId) => {
+                    currentTab.value = tabId;
+                    currentPage.value = 1;
+                    fetchTableData();
+                };
+
+                const changePage = (page) => {
+                    if (page < 1 || page > totalPages.value) return;
+                    currentPage.value = page;
+                    fetchTableData();
+                };
+
+                const refreshAll = async () => {
+                    loading.value = true;
+                    await Promise.all([fetchStats(), fetchTableData()]);
+                    loading.value = false;
+                };
+
+                const showDetail = (content) => {
+                    try {
+                        // Try to format if it's JSON
+                        const json = JSON.parse(content);
+                        detailContent.value = JSON.stringify(json, null, 2);
+                    } catch (e) {
+                        detailContent.value = content;
+                    }
+
+                    if (!detailModal) {
+                        detailModal = new bootstrap.Modal(document.getElementById('detailModal'));
+                    }
+                    detailModal.show();
+                };
+
+                // Lifecycle
+                onMounted(() => {
+                    updateTime();
+                    setInterval(updateTime, 1000);
+                    refreshAll();
+                    // Auto refresh stats every 30s
+                    setInterval(fetchStats, 30000);
+                });
+
+                return {
+                    loading,
+                    tableLoading,
+                    stats,
+                    currentTab,
+                    tabs,
+                    tableData,
+                    currentPage,
+                    pageSize,
+                    total,
+                    totalPages,
+                    displayedPages,
+                    currentTime,
+                    detailContent,
+                    switchTab,
+                    changePage,
+                    refreshAll,
+                    formatTime,
+                    formatSize,
+                    getStatusText,
+                    getStatusClass,
+                    showDetail
+                };
+            }
+        }).mount('#app');
+    </script>
+</body>
+
+</html>

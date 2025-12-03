@@ -4,7 +4,6 @@ import com.baomidou.dynamic.datasource.annotation.DS;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.company.datareport.entity.sqlite.HadwnIndxTab;
-import com.company.datareport.entity.sqlite.HadwnInfoResTab;
 import com.company.datareport.mapper.sqlite.HadwnIndxTabMapper;
 import com.company.datareport.service.sqlite.IHadwnIndxTabService;
 import org.springframework.stereotype.Service;

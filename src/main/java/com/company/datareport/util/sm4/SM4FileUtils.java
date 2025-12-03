@@ -133,13 +133,12 @@ public class SM4FileUtils {
         fileOut.close();
     }
 
-    public static List<String> encrptReportZip(String zipFilePath) throws IOException {
+    public static   List<String> encrptReportZip(String zipFilePath,String sm2SecretKey) throws IOException {
         List<String> filePathList = new ArrayList<>();
         //随机SM4秘钥
         String sm4SecretKey = UUID.randomUUID().toString().replace("-", "");
         System.out.println(sm4SecretKey);
         //上报默认SM2加密秘钥
-        String sm2SecretKey = "04F6E0C3345AE42B51E06BF50B98834988D54EBC7460FE135A48171BC0629EAE205EEDE253A530608178A98F1E19BB737302813BA39ED3FA3C51639D7A20C7391A";
         byte[] fileByte = SM4FileUtils.getBytes(zipFilePath);
         SM4Utils sm4Utils = new SM4Utils();
         sm4Utils.setSecretKey(sm4SecretKey);

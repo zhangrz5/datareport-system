@@ -1,0 +1,19 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir:*)",
+      "Bash(findstr:*)",
+      "Bash(mkdir:*)",
+      "Bash(mvn test:*)",
+      "Bash(./mvnw.cmd test:*)",
+      "Bash(mvn.cmd test:*)",
+      "Bash(del:*)",
+      "Bash(rm:*)",
+      "Bash(mvn clean:*)",
+      "Bash(find:*)",
+      "Bash(mvn compile:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

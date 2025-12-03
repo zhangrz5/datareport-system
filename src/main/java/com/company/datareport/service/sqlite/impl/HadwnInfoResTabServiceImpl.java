@@ -7,8 +7,6 @@ import com.company.datareport.mapper.sqlite.HadwnInfoResTabMapper;
 import com.company.datareport.service.sqlite.IHadwnInfoResTabService;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 /**
  * 信息资源表 服务实现类
  */

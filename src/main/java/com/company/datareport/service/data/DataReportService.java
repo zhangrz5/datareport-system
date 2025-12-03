@@ -1,8 +1,14 @@
 package com.company.datareport.service.data;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.company.datareport.entity.sqlite.HadwnIndxTab;
 import com.company.datareport.entity.sqlite.HadwnRestGathrTab;
+import com.company.datareport.entity.system.DataReportRecord;
+import com.company.datareport.entity.system.SyncRecord;
 import com.company.datareport.service.sqlite.IHadwnIndxTabService;
+import com.company.datareport.service.sqlite.IHadwnRestGathrTabService;
+import com.company.datareport.service.system.DataReportRecordService;
+import com.company.datareport.service.system.SyncRecordService;
 import com.company.datareport.util.SqlHelper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -11,23 +17,41 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * 数据报表服务类
+ * 提供数据查询、转换和更新等功能
+ */
 @Service
 @Slf4j
 @RequiredArgsConstructor
 public class DataReportService {
+    // 注入数据查询服务
     private final DataQueryService dataQueryService;
+    // 注入SQL帮助类
     private final SqlHelper sqlHelper;
+    // 注入索引表服务
     private final IHadwnIndxTabService hadwnIndxTabService;
 
+    private final IHadwnRestGathrTabService hadwnRestGathrTabService;
+
+    private final DataReportRecordService dataReportRecordService;
+
+    private final SyncRecordService syncRecordService;
+
+    // 定义需要处理的表列表
     public static List<String> tableList= List.of("SASAORGANIZATIONS","SASAOWNERSHIP","SASAEQUITYPART","SASAPERSONNEL","SASALAYERSTR");
+    // 定义日期时间格式化器
     public static DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
 
+    // 从配置文件中获取企业名称
     @Value("${app.corporate.name}")
     private String corporateName;
+    // 从配置文件中获取企业代码
     @Value("${app.corporate.code}")
     private String corporateCode;
 
@@ -46,11 +70,26 @@ public class DataReportService {
         return (Timestamp) result.get("SYNC_TIME");
     }
 
+
+    /**
+     * 更新指定表的最后同步时间
+     * @param tableName 表名
+     * @param lastTime 最后同步时间
+     * @param size 处理的数据量
+     * @return 返回更新的行数
+     */
     public int updateLastTime(String tableName,Timestamp lastTime,int size){
         String sql = sqlHelper.getSql("update", "dataTask", "updateLastTime");
         return dataQueryService.executeUpdate(sql,tableName,lastTime,size);
     }
 
+    /**
+     * 获取指定表在指定时间范围内的新增数据
+     * @param tableName 表名
+     * @param lastTime 最后同步时间
+     * @param nowTime 当前时间
+     * @return 返回转换后的数据列表
+     */
     public List<HadwnRestGathrTab> getAddData(String tableName,Timestamp lastTime,Timestamp nowTime){
         String sql = sqlHelper.getSql("query", "dataTask", tableName);
         List<Map<String, Object>> list=dataQueryService.executeQuery(sql,lastTime,nowTime);
@@ -58,10 +97,20 @@ public class DataReportService {
         return hadwnRestGathrTabList;
     }
 
+    public void clearData(){
+        hadwnRestGathrTabService.remove(new QueryWrapper<>());
+    }
 
+    /**
+     * 将查询结果转换为HadwnRestGathrTab对象列表
+     * @param list 查询结果列表
+     * @param tableName 表名
+     * @return 转换后的HadwnRestGathrTab对象列表
+     */
     private List<HadwnRestGathrTab>  transformData(List<Map<String, Object>> list,String tableName) {
         List<HadwnRestGathrTab> hadwnRestGathrTabList=new ArrayList<>();
         switch (tableName) {
+            // 处理组织机构表
             case "SASAORGANIZATIONS":
                 list.forEach(item -> {
                     //主表的主键是
@@ -266,6 +315,26 @@ public class DataReportService {
                 return null;
 
         }
+    }
+
+
+    public void insertDataReportRecord(int count){
+        List<SyncRecord> syncRecordList=syncRecordService.list();
+        StringBuilder sb = new StringBuilder();
+        sb.append("今天生成数据总数为：").append(count).append("条。");
+        syncRecordList.forEach(syncRecord -> {
+            sb.append("表名：").append(syncRecord.getTableName()).append("，生成数据条数：").append(syncRecord.getSyncCount()).append("条;");
+        });
+        DataReportRecord dataReportRecord= new DataReportRecord();
+        dataReportRecord.setTotalCount(count);
+        dataReportRecord.setReportDetail(sb.toString());
+        dataReportRecord.setCreateTime(LocalDateTime.now());
+        if (count == 0){
+            dataReportRecord.setIsReported(0);
+        }else {
+            dataReportRecord.setIsReported(1);
+        }
+        dataReportRecordService.save(dataReportRecord);
     }
 
 

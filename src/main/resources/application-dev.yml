@@ -28,7 +28,7 @@ spring:
             pool-prepared-statements: true
             max-pool-prepared-statement-per-connection-size: 20
 
-        # 从数据源1(SQLite 密钥数据库)
+        # 从数据源1(SQLite 上报数据库)
         slave1:
           driver-class-name: org.sqlite.JDBC
           url: jdbc:sqlite:E:/project/国企上报/0025_1001_20251121.db
@@ -81,10 +81,7 @@ spring:
   #     - org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration
   #     - org.redisson.spring.starter.RedissonAutoConfiguration
 
-# MyBatis-Plus SQL日志开关（已在 application.yml 中配置）
-#mybatis-plus:
-#  configuration:
-#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
 
 logging:
   level:
@@ -98,27 +95,36 @@ app:
   platform:
     # 获取任务列表API
     task-list-url: http://platform.example.com/api/tasks
-    # 上报数据API
-    upload-url: http://platform.example.com/api/upload
+    # 上报数据API（文件上传接口）
+    upload-url: http://127.0.0.1:8080/preposed-machine/api/services/fileUpload
+
+    # 轮询获取通告接口（文件上传接口）
+    download-url: http://127.0.0.1:8100/preposed-machine/api/services/noticeDownload
+    # 数据日志接口
+    log-url: http://127.0.0.1:8100/preposed-machine/api/services/logDownload
     # 企业编码
-    enterprise-code: ENTERPRISE_001
+    enterprise-code: 11320114745362524W
     # 认证密钥
-    auth-key: your-auth-key
+    auth-key: 11320114745362524W
     # 请求超时时间(秒)
     timeout: 30
+    # 平台登录用户名
+    username: 11320114745362524W
+    # 平台登录密码
+    password: 11320114745362524W
     #sm2密钥
-    sm2-key:
-      152E1DD4EBB0978B62CCEF3F16C47BB31A8455EAD47FADE3B122A2F15EDB346B4614A3B442B607B0A2F296113AB0CD97ABE99049990E9B0E61F33DC4BC735909
+    sm2-key: 152E1DD4EBB0978B62CCEF3F16C47BB31A8455EAD47FADE3B122A2F15EDB346B4614A3B442B607B0A2F296113AB0CD97ABE99049990E9B0E61F33DC4BC735909
     #sm4密钥
-    sm4-key:
-      5b2ee70a2cd34d109ba1fb0a03bd6971
+    sm4-key: 5b2ee70a2cd34d109ba1fb0a03bd6971
 
   # 任务调度配置
   scheduler:
     # 是否启用定时任务
     enabled: true
-    # 数据上报Cron表达式(每天凌晨3点执行)
+    # 数据上报Cron表达式(每天凌晨4点执行)
     data-upload-cron: 0 0 4 * * ?
+    # 初始延时（毫秒）
+    initial-delay: 10000
 
   # 重试配置
   retry:
@@ -133,8 +139,16 @@ app:
     upload-path: E:/project/国企上报/upload/
     # 文件上传临时目录
     temp-path: E:/project/国企上报/temp/
+    # 下载文件路径
+    download-path: E:/project/国企上报/download/
+    # 轮询次数
+    download-try: 3
+    # 轮询间隔(秒)
+    download-delay: 60
     # 单文件最大大小(MB)
     max-file-size: 500
+    #上传所需，配置文件地址。注意后期若密钥的version发生了变动，配置文件里的版本要同步更改
+    report-config-path: D:\code\datareport-system\src\main\resources\REPORT_DATA.xml
 
   # SQLite 数据库文件配置
   sqlite:

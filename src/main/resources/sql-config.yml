@@ -191,57 +191,15 @@ sql:
       updateLastTime: >
         UPDATE   SYNC_RECORD SET SYNC_TIME = #{params.param1},SYNC_COUNT = #{params.param2}  where table_name = #{params.param0} 
 
-  # 数据插入相关SQL
-  insert:
-    person:
-      insertOne: >
-        INSERT INTO person_info
-        (id, person_name, id_card, phone, email, address, create_time, update_time, delete_flag)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
-
-      batchInsert: >
-        INSERT INTO person_info
-        (id, person_name, id_card, phone, email, address, create_time, update_time, delete_flag)
-        VALUES
-
-    organization:
-      insertOne: >
-        INSERT INTO organization_info
-        (id, org_name, org_code, unified_social_credit_code, parent_id, org_level, create_time, update_time, delete_flag)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
-
-    equity:
-      insertOne: >
-        INSERT INTO equity_info
-        (id, org_id, person_id, equity_ratio, investment_amount, create_time, update_time, delete_flag)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, 0)
+ 
 
 
 
   # 数据删除相关SQL（逻辑删除）
   delete:
-    person:
-      deleteById: >
-        UPDATE person_info
-        SET delete_flag = 1, update_time = ?
-        WHERE id = ?
-
-      batchDelete: >
-        UPDATE person_info
-        SET delete_flag = 1, update_time = ?
-        WHERE id IN
-
-    organization:
-      deleteById: >
-        UPDATE organization_info
-        SET delete_flag = 1, update_time = ?
-        WHERE id = ?
-
-    equity:
-      deleteById: >
-        UPDATE equity_info
-        SET delete_flag = 1, update_time = ?
-        WHERE id = ?
+    dataTask:
+      clearData: >
+        delete from  hadwn_rest_gathr_tab_1
 
   # 统计分析相关SQL
   statistics:

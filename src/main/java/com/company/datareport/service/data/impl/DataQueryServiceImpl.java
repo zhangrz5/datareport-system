@@ -39,12 +39,12 @@ public class DataQueryServiceImpl implements DataQueryService {
 
     @Override
     public List<Map<String, Object>> executeQuery(String sql, Object... params) {
-        log.info("执行查询SQL: {}, 参数: {}", sql, params);
+        //log.info("执行查询SQL: {}, 参数: {}", sql, params);
         try {
             // 将可变参数转换为Map
             Map<String, Object> paramMap = convertParamsToMap(params);
             List<Map<String, Object>> result = dataQueryMapper.executeQueryWithParams(sql, paramMap);
-            log.info("查询成功，返回 {} 条记录", result != null ? result.size() : 0);
+            //log.info("查询成功，返回 {} 条记录", result != null ? result.size() : 0);
             return result;
         } catch (Exception e) {
             log.error("执行查询SQL失败: {}, 参数: {}", sql, params, e);
@@ -67,12 +67,12 @@ public class DataQueryServiceImpl implements DataQueryService {
 
     @Override
     public Map<String, Object> executeQueryOne(String sql, Object... params) {
-        log.info("执行单行查询SQL: {}, 参数: {}", sql, params);
+        //log.info("执行单行查询SQL: {}, 参数: {}", sql, params);
         try {
             // 将可变参数转换为Map
             Map<String, Object> paramMap = convertParamsToMap(params);
             Map<String, Object> result = dataQueryMapper.executeQueryOneWithParams(sql, paramMap);
-            log.info("查询成功");
+            //log.info("查询成功");
             return result;
         } catch (Exception e) {
             log.error("执行单行查询SQL失败: {}, 参数: {}", sql, params, e);
@@ -97,12 +97,12 @@ public class DataQueryServiceImpl implements DataQueryService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public int executeUpdate(String sql, Object... params) {
-        log.info("执行更新SQL: {}, 参数: {}", sql, params);
+        //log.info("执行更新SQL: {}, 参数: {}", sql, params);
         try {
             // 将可变参数转换为Map
             Map<String, Object> paramMap = convertParamsToMap(params);
             int rows = dataQueryMapper.executeUpdateWithParams(sql, paramMap);
-            log.info("更新成功，影响 {} 行", rows);
+            //log.info("更新成功，影响 {} 行", rows);
             return rows;
         } catch (Exception e) {
             log.error("执行更新SQL失败: {}, 参数: {}", sql, params, e);
