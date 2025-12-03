@@ -6,20 +6,7 @@
 
 ## 📚 文档导航
 
-### 基础文档
-- **[快速启动指南](./QUICK_START.md)** - 5分钟快速启动项目
-- **[达梦数据库配置指南](./DM_DATABASE_GUIDE.md)** - 达梦数据库详细配置说明
-- **[数据库迁移总结](./DM_MIGRATION_SUMMARY.md)** - 达梦数据库迁移记录
-- **[数据库对比指南](./DATABASE_COMPARISON.md)** - 三种数据库对比与选择
-- **[Redis使用说明](./REDIS_USAGE.md)** - Redis的作用和使用场景
-- **[升级指南](./UPGRADE_GUIDE.md)** - Spring Boot 2 升级到 3 的指南
 
-### 国资委接口文档 🆕
-- **[接口实现文档](./INTERFACE_IMPLEMENTATION.md)** - 6个接口的详细说明和使用指南
-- **[实现总结](./IMPLEMENTATION_SUMMARY.md)** - 已完成和待完成功能总结
-- **[接口快速开始](./QUICK_START.md)** - 接口测试和使用指南
-- **[SQL查询手册](./SQL_QUERIES.sql)** - 常用SQL查询语句
-- **[Postman测试集合](./postman_collection.json)** - 可导入Postman的接口测试集合
 
 ## 技术栈
 
