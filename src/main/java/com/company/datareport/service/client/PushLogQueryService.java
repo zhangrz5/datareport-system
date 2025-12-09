@@ -13,6 +13,7 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.Duration;
 import java.time.LocalDate;
@@ -51,30 +52,31 @@ public class PushLogQueryService {
         String url = serverUrl;
 
         // 构建请求参数
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("STARTDATE", startDate);
-        formData.add("ENDDATE", endDate);
-        formData.add("USER", defaultUsername);
-        formData.add("PASSWORD", defaultPassword);
-        formData.add("SIDE", SIDE);
-
-        String requestBody = formData.toString();
+        String requestParams = String.format("STARTDATE=%s&ENDDATE=%s&USER=%s&PASSWORD=%s&SIDE=%s",
+                startDate, endDate, defaultUsername, defaultPassword, SIDE);
 
         // 创建记录
-        PushLogRecord record = pushLogRecordService.createRecord(url, requestBody, startDate, endDate, requestTime);
+        PushLogRecord record = pushLogRecordService.createRecord(url, requestParams, startDate, endDate, requestTime);
 
         QueryResult result = new QueryResult();
         result.setRecordId(record.getId());
         result.setStartDate(startDate);
         result.setEndDate(endDate);
 
-        log.info("查询报送日志: startDate={}, endDate={}", startDate, endDate);
+        String finalUrl = UriComponentsBuilder.fromHttpUrl(url)
+                .queryParam("STARTDATE", startDate)
+                .queryParam("ENDDATE", endDate)
+                .queryParam("USER", defaultUsername)
+                .queryParam("PASSWORD", defaultPassword)
+                .queryParam("SIDE", SIDE)
+                .build()
+                .toUriString();
+
+        log.info("查询报送日志: startDate={}, endDate={},请求地址是{}", startDate, endDate,finalUrl);
 
         try {
             String responseBody = webClient.post()
-                    .uri(url)
-                    .contentType(MediaType.APPLICATION_FORM_URLENCODED)
-                    .body(BodyInserters.fromFormData(formData))
+                    .uri(finalUrl)
                     .retrieve()
                     .bodyToMono(String.class)
                     .block(Duration.ofMinutes(5));

@@ -12,6 +12,7 @@ import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.io.File;
@@ -72,30 +73,30 @@ public class PlatformFileUploadService {
         record.setRetryCount(0);
 
         try {
-            log.info("开始上传文件到平台: {}, 业务类型: {}, 日志ID: {}", file.getName(), busType, logId);
+            String finalUrl = UriComponentsBuilder.fromHttpUrl(uploadUrl)
+                    .queryParam("APICODE", apiCode)
+                    .queryParam("BUSTYPE", busType)
+                    .queryParam("FILE_NAME", file.getName())
+                    .queryParam("SOCIALCREDITCODE", corporateCode)
+                    .queryParam("USER", user)
+                    .queryParam("PASSWORD", password)
+                    .build()
+                    .toUriString();
+            log.info("开始上传文件到平台: {}, 业务类型: {}, 上报url: {}", file.getName(), busType, finalUrl);
 
             // 保存初始记录
             fileUploadRecordMapper.insert(record);
 
-            // 构建 Multipart 请求体
             MultipartBodyBuilder builder = new MultipartBodyBuilder();
-            builder.part("file", new FileSystemResource(file));
-            builder.part("APICODE", apiCode);
-            builder.part("BUSTYPE", busType);
-            builder.part("FILE_NAME", file.getName());
-            builder.part("SOCIALCREDITCODE", corporateCode);
-            builder.part("USER", user);
-            builder.part("PASSWORD", password);
-
+            builder.part("File", new FileSystemResource(file));
             // 使用 WebClient 发送请求
             Mono<InterfaceResponse> responseMono = webClient.post()
-                    .uri(uploadUrl)
+                    .uri(finalUrl)
                     .contentType(MediaType.MULTIPART_FORM_DATA)
                     .body(BodyInserters.fromMultipartData(builder.build()))
                     .retrieve()
                     .bodyToMono(InterfaceResponse.class)
                     .timeout(Duration.ofSeconds(60));
-
             // 阻塞获取响应（同步调用）
             InterfaceResponse result = responseMono.block();
 

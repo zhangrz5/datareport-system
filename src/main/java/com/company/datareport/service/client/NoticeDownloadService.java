@@ -16,6 +16,7 @@ import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.ClientResponse;
 import org.springframework.web.reactive.function.client.WebClient;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Schedulers;
@@ -118,17 +119,16 @@ public class NoticeDownloadService {
         NoticeDownloadResult result = new NoticeDownloadResult();
         result.setRecordId(record.getId());
 
-        log.debug("请求下载通知公告: {}", serverUrl);
+        String finalUrl = UriComponentsBuilder.fromHttpUrl(serverUrl)
+                .queryParam("USER", defaultUsername)
+                .queryParam("PASSWORD", defaultPassword)
+                .build()
+                .toUriString();
+        log.debug("请求下载通知公告: {}", finalUrl);
 
         try {
-            Map<String, String> requestBody = new HashMap<>();
-            requestBody.put("USER", defaultUsername);
-            requestBody.put("PASSWORD", defaultPassword);
             ClientResponse response = webClient.post()
-                    .uri(serverUrl)
-                    //先按照json来，不行再说
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .bodyValue(requestBody)
+                    .uri(finalUrl)
                     .exchangeToMono(Mono::just)
                     .block(Duration.ofMinutes(5));
 
